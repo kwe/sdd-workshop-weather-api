@@ -138,3 +138,11 @@ No BLOCKING overlaps. All listed files remain additive-hook-only edits. No merge
 **Context**: Build and Test, Status awaiting-approval.
 
 ---
+
+## Build and Test - third rebase + browser check
+**Timestamp**: 2026-10-30T13:30:00Z
+**User Input**: "Orchestrator: main moved again (e353ad1 ...). Please: (1) git rebase main and re-run the full section 9 gate ... (2) NEW real-browser check ... (3) Record results in your build-and-test summary, stop the server, commit, Status awaiting-approval."
+**AI Response**: Rebased cleanly onto e353ad1; gate green; CDP check: no exceptions, all 200, no null/undefined, banner '10 alerts', Tokyo favourite. Server stopped.
+**Context**: Build and Test, Status awaiting-approval.
+
+---
