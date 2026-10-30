@@ -4,6 +4,8 @@ A complete Rust starter project for an SDD workshop. It provides a small,
 working Weather API that participants can run, explore, and extend using their
 preferred Spec-Driven Development workflow.
 
+![Weather Globe: a 3D globe with temperature pins and the city list](docs/images/globe-overview.png)
+
 ## Tech Stack
 
 - Rust (stable, 2024 edition)
@@ -133,6 +135,8 @@ cargo test
 
 Open `http://localhost:8080/` for an interactive 3D globe. Drag to rotate, scroll or pinch to zoom, and click a pin (or a city in the list) to fly to it and see current conditions plus the 5-day forecast. The UI reads only `GET /api/weather` and `GET /api/weather/forecast/{city}`; it refreshes every 60 seconds and supports °C/°F, search (`/`), and reduced-motion preferences.
 
+![City detail panel for New York with current conditions and the 5-day forecast](docs/images/city-detail.png)
+
 - **No build step**: static HTML/CSS/ES modules in `static/` are embedded into the binary (rebuild after editing them).
 - **CDN dependencies**: globe.gl 2.46.2 (SRI-pinned) and Earth textures (three-globe 2.45.6) load from `cdn.jsdelivr.net`, so the globe needs internet access; without it the city list still works.
 - **City placement**: the API has no coordinates, so cities are matched against a built-in gazetteer (`static/js/gazetteer.js`). Cities not in it appear in the list as "not on globe".
@@ -141,6 +145,8 @@ Open `http://localhost:8080/` for an interactive 3D globe. Drag to rotate, scrol
 ### Weather Alerts
 
 `GET /api/alerts` evaluates every city's latest weather record (and its 5-day forecast highs/lows) against the thresholds in the `alert_thresholds` table and returns the active alerts as `[{city, country, type, severity, value, threshold, source, date}]` (`type`: heat, cold, wind, humidity; `severity`: watch, warning, severe; `source`: current, forecast). Defaults: heat >= 30 C, cold <= 0 C, wind >= 40 km/h, humidity >= 85%. Edit the table to tune them. On the globe, alerting cities get a pulsing ring coloured by worst severity (a static ring under reduced motion), the detail panel lists the city's alerts, and the alerts banner flies to a city when an item is clicked. Alerts refresh on the existing 60-second cycle.
+
+![Alerts banner expanded to list active heat watches](docs/images/weather-alerts.png)
 
 ## Workshop Challenge
 
