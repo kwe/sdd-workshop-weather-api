@@ -122,3 +122,11 @@ No BLOCKING overlaps. All listed files remain additive-hook-only edits. No merge
 **Context**: CONSTRUCTION - Code Generation, awaiting approval.
 
 ---
+
+## Build and Test
+**Timestamp**: 2026-10-30T13:15:00Z
+**User Input**: "Approved - continue to Build and Test per parallel-features.md section 9. Also: your functional design predicted 12 seed alerts but the code yields 10. In the build-and-test summary, explain the discrepancy (which design assumption was wrong, or fix the code if the code is wrong). Note: favourites is also at Build and Test and will likely merge to main first; if main moves before you finish, rebase again."
+**AI Response**: Rebased onto main (clean, no conflicts). fmt, clippy, full tests green. Server on 8082 exercised and stopped. Discrepancy explained: design miscounted Tokyo forecast days (only 3 of 5 highs >= 30); code correct.
+**Context**: Build and Test, Status awaiting-approval.
+
+---

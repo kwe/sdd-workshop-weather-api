@@ -1,6 +1,6 @@
 # AI-DLC State: weather-alerts
 
-- **Current Stage**: CONSTRUCTION - Code Generation Part 2 complete (awaiting approval)
+- **Current Stage**: CONSTRUCTION - Build and Test complete (awaiting approval)
 - **Status**: awaiting-approval
 
 ## Project Information
