@@ -22,4 +22,4 @@
 - A1: Seeded cut-offs: heat 30/35/40, cold 0/-5/-15, wind 40/60/90, humidity 85/90/95.
 - A2: Severity keys are lowercase strings `watch|warning|severe`; types `heat|cold|wind|humidity`; source `current|forecast`.
 - A3: Alert dates for current readings come from the stored timestamp without timezone conversion.
-- A4: Expected result on the seed data (all `watch`): Tokyo heat current (30.3) + forecast days 0, 1, 4 (30.5, 31.0, 30.0); Mumbai heat current (31.7) + all 5 forecast days. 12 alerts total; no cold, wind or humidity alerts (max wind 22.4, max humidity 82, min forecast low 7.5).
+- A4: Expected result on the seed data (all `watch`): Tokyo heat current (30.3) + forecast days 0, 1, 4 (30.5, 31.0, 30.0); Mumbai heat current (31.7) + all 5 forecast days. 10 alerts total (corrected from an initial miscount of 12); no cold, wind or humidity alerts (max wind 22.4, max humidity 82, min forecast low 7.5).

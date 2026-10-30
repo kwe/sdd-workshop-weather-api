@@ -1,3 +1,4 @@
+pub mod alerts;
 pub mod db;
 pub mod error;
 pub mod favourites;
@@ -22,7 +23,8 @@ use utoipa_swagger_ui::SwaggerUi;
         handlers::get_forecast,
         favourites::get_favourites,
         favourites::create_favourite,
-        favourites::delete_favourite
+        favourites::delete_favourite,
+        alerts::get_alerts_handler
     ),
     components(schemas(
         models::WeatherRecord,
@@ -30,11 +32,16 @@ use utoipa_swagger_ui::SwaggerUi;
         models::CreateWeatherRecordRequest,
         models::ErrorResponse,
         favourites::Favourite,
-        favourites::CreateFavouriteRequest
+        favourites::CreateFavouriteRequest,
+        alerts::Alert,
+        alerts::AlertType,
+        alerts::Severity,
+        alerts::AlertSource
     )),
     tags(
         (name = "weather", description = "Weather record operations"),
-        (name = "favourites", description = "Favourite cities")
+        (name = "favourites", description = "Favourite cities"),
+        (name = "alerts", description = "Dangerous weather alerts")
     )
 )]
 struct ApiDoc;
@@ -55,6 +62,7 @@ pub fn app(pool: SqlitePool) -> Router {
             "/swagger-ui.html",
             get(|| async { axum::response::Redirect::temporary("/swagger-ui/") }),
         )
+        .route("/api/alerts", get(alerts::get_alerts_handler))
         .merge(frontend::router())
         .merge(favourites::router())
         .with_state(pool)

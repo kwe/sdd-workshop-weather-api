@@ -90,3 +90,27 @@ No BLOCKING overlap (route/table/migration distinct). Shared files listed under 
 **Context**: CONSTRUCTION - Code Generation Part 1, awaiting approval.
 
 ---
+
+## Code Generation - Plan Approval (with changes)
+**Timestamp**: 2026-10-30T13:05:21Z
+**User Input**: "Plan approved with changes: (1) Orchestrator fixed a bug in scripts/aidlc-claims-check.sh (js-module vs file claims weren't compared). Run git cherry-pick 188dbaf, re-run the check, and log the new output (expect more SHARED-FILE lines: api.js, state.js, main.js, ui.js, globe-scene.js) - keep those edits small additive hooks. (2) Drop the optional node execution from tests/alerts_frontend.rs: no conditionally-skipped tests. Evaluation logic is tested in Rust (unit tests in src/alerts.rs + tests/alerts.rs); keep the static frontend checks. Then generate the code."
+**Status**: Approved with changes
+**AI Response**: Cherry-picked 188dbaf (clean, commit e0f6bf4). Plan step 22 dropped. Claims check #3 output:
+```
+SHARED-FILE [favourites] file: README.md
+SHARED-FILE [favourites] file: src/frontend.rs
+SHARED-FILE [favourites] file: src/lib.rs
+SHARED-FILE [favourites] file: static/css/app.css
+SHARED-FILE [favourites] file: static/index.html
+SHARED-FILE [favourites] file: static/js/api.js
+SHARED-FILE [favourites] file: static/js/globe-scene.js
+SHARED-FILE [favourites] file: static/js/main.js
+SHARED-FILE [favourites] file: static/js/state.js
+SHARED-FILE [favourites] file: static/js/ui.js
+RESULT: shared files only (allowed; keep edits minimal and additive)
+exit=0
+```
+No BLOCKING overlaps. All listed files remain additive-hook-only edits. No merge conflicts in cherry-pick.
+**Context**: CONSTRUCTION - Code Generation Part 2 begins.
+
+---

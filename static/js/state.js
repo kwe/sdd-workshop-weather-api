@@ -8,6 +8,8 @@ const state = {
   status: { phase: 'loading', stale: false, lastOk: null, message: '' },
   query: '',
   favourites: [],
+  alerts: [],
+  alertsStatus: 'loading',
 };
 
 try {
