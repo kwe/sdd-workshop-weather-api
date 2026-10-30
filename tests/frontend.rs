@@ -163,3 +163,39 @@ fn embedded_files_avoid_unsafe_dom_and_eval_apis() {
         }
     }
 }
+
+#[tokio::test]
+async fn favourites_module_is_served_with_csp_and_wired_into_the_page() {
+    let response = get("/static/js/favourites.js").await;
+    assert_eq!(response.status(), StatusCode::OK);
+    assert_eq!(
+        header_str(&response, header::CONTENT_TYPE),
+        "text/javascript; charset=utf-8"
+    );
+    assert_eq!(
+        header_str(&response, header::CONTENT_SECURITY_POLICY),
+        frontend::CONTENT_SECURITY_POLICY
+    );
+
+    let html = frontend::INDEX.body;
+    for id in [
+        "id=\"favourites\"",
+        "id=\"favourite-list\"",
+        "id=\"fav-toggle\"",
+    ] {
+        assert!(html.contains(id), "index.html is missing {id}");
+    }
+    let asset = |path: &str| {
+        frontend::ASSETS
+            .iter()
+            .find(|a| a.path == path)
+            .unwrap_or_else(|| panic!("{path} is not registered"))
+            .body
+    };
+    assert!(asset("css/app.css").contains(".pin.favourite"));
+    let api = asset("js/api.js");
+    for call in ["/api/favourites", "'POST'", "'DELETE'"] {
+        assert!(api.contains(call), "api.js is missing {call}");
+    }
+    assert!(asset("js/ui.js").contains("fav-item"));
+}

@@ -183,3 +183,29 @@ h1 { margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 0.18em; text-
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-delay: 0ms !important; transition-duration: 0.001ms !important; }
 }
+
+/* favourites */
+:root { --fav: #fbbf24; }
+.favourites { padding: 0 10px 8px; flex: none; max-height: 30%; overflow-y: auto; scrollbar-width: thin; border-bottom: 1px solid var(--border); }
+.favourites h2 { margin: 0; padding: 4px 10px 6px; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fav); font-weight: 600; }
+.favourite-list { list-style: none; margin: 0; padding: 0; }
+.fav-item {
+  width: 100%; display: grid; grid-template-columns: 22px 1fr auto; gap: 8px; align-items: center;
+  text-align: left; background: transparent; border: 1px solid transparent; border-radius: 12px;
+  padding: 6px 10px; min-height: 44px; transition: background 0.2s, border-color 0.2s;
+}
+.fav-item:hover:not(:disabled) { background: rgba(251, 191, 36, 0.1); }
+.fav-item[aria-current="true"] { background: rgba(251, 191, 36, 0.14); border-color: rgba(251, 191, 36, 0.5); }
+.fav-item:disabled { cursor: default; opacity: 0.6; }
+.fav-star { color: var(--fav); font-size: 15px; text-align: center; }
+.fav-toggle {
+  flex: none; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.05); color: var(--muted); font-size: 22px; line-height: 1; margin: -8px 0 0 auto;
+}
+.fav-toggle:hover:not(:disabled) { background: rgba(251, 191, 36, 0.15); color: var(--fav); }
+.fav-toggle[aria-pressed="true"] { color: var(--fav); border-color: rgba(251, 191, 36, 0.6); background: rgba(251, 191, 36, 0.12); }
+.fav-toggle:disabled { opacity: 0.5; cursor: progress; }
+.pin.favourite { border-color: var(--fav); box-shadow: 0 0 0 2px var(--fav), 0 0 16px rgba(251, 191, 36, 0.65), inset 0 0 0 1px var(--pc, #94a3b8); }
+.pin.favourite.selected { border-color: #fff; }
+.pin-star { color: var(--fav); font-size: 12px; line-height: 1; order: 3; text-shadow: 0 0 6px rgba(251, 191, 36, 0.8); }
+.detail-head > div:first-child { flex: 1; min-width: 0; }

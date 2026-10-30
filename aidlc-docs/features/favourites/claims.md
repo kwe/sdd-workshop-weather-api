@@ -1,0 +1,19 @@
+- route: GET /api/favourites
+- route: POST /api/favourites
+- route: DELETE /api/favourites/{city}
+- table: favourites
+- migration: 20261030130305_create_favourites.sql
+- file: src/favourites.rs (create)
+- file: tests/favourites.rs (create)
+- file: src/lib.rs (edit)
+- file: src/frontend.rs (edit)
+- file: tests/frontend.rs (edit)
+- file: README.md (edit)
+- file: static/index.html (edit)
+- file: static/css/app.css (edit)
+- js-module: static/js/favourites.js (create)
+- js-module: static/js/api.js (edit)
+- js-module: static/js/state.js (edit)
+- js-module: static/js/main.js (edit)
+- js-module: static/js/ui.js (edit)
+- js-module: static/js/globe-scene.js (edit)

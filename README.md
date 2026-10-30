@@ -70,6 +70,9 @@ OpenAPI JSON: `http://localhost:8080/v3/api-docs`
 | POST | `/api/weather` | Create a new weather record |
 | DELETE | `/api/weather/{id}` | Delete a weather record by ID |
 | GET | `/api/weather/forecast/{city}` | 5-day forecast (today through today + 4, UTC dates), city case-insensitive |
+| GET | `/api/favourites` | List favourite cities (newest first) with each city's latest weather |
+| POST | `/api/favourites` | Favourite a city (`{"city":"London"}`): 201 created, 200 already a favourite |
+| DELETE | `/api/favourites/{city}` | Remove a favourite (204, or 404 if not a favourite), city case-insensitive |
 
 The forecast data is seeded and static; only the dates roll forward. Unknown
 cities return 404 and a blank city returns 400.
@@ -171,6 +174,15 @@ weather-api/
 ├── Cargo.toml
 └── README.md
 ```
+
+### Favourites
+
+Users can star cities so they can get back to them quickly. Favourites are one global list stored in the SQLite `favourites` table (no users or auth).
+
+- `POST /api/favourites` trims `city` and matches it case-insensitively against weather records: 201 on create, 200 if already a favourite, 404 if the city has no weather records, 400 if `city` is missing, not a string, blank, or longer than 100 characters.
+- `GET /api/favourites` returns `[{"city":"London","favouritedAt":"...","weather":{...}|null}]`, where `weather` is the latest record (greatest `recordedAt`, ties by `id`); it is `null` if all of the city's records were deleted.
+- `DELETE /api/favourites/{city}` returns 204, 404 if the city is not a favourite, or 400 if blank.
+- In the globe UI, the detail panel has a star toggle, the sidebar has a Favourites section that flies to the city when clicked, and favourite pins get a gold ring and star badge (CSS only).
 
 ## Parallel AI-DLC Features
 

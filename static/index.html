@@ -32,6 +32,10 @@
       <div class="search">
         <input id="search" type="search" maxlength="60" placeholder="Search cities  ( / )" aria-label="Search cities" autocomplete="off" spellcheck="false">
       </div>
+      <section class="favourites" id="favourites" aria-labelledby="favourites-title" hidden>
+        <h2 id="favourites-title">Favourites</h2>
+        <ul class="favourite-list" id="favourite-list"></ul>
+      </section>
       <ul class="city-list" id="city-list"></ul>
     </aside>
 
@@ -41,6 +45,7 @@
           <h2 id="detail-title"></h2>
           <p class="detail-sub" id="detail-sub"></p>
         </div>
+        <button type="button" class="fav-toggle" id="fav-toggle" aria-pressed="false" aria-label="Add to favourites" hidden><span aria-hidden="true">☆</span></button>
         <button type="button" class="close" id="detail-close" aria-label="Close details">✕</button>
       </header>
       <p class="note" id="detail-note" hidden></p>

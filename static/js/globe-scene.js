@@ -1,6 +1,7 @@
 import { el, clear, icon } from './dom.js';
 import { subsolarPoint, toVector, isDaylight } from './sun.js';
 import { conditionKind, formatTemp, temperatureColor, sanitize } from './weather.js';
+import { isFavourite } from './favourites.js';
 
 const IMG = 'https://cdn.jsdelivr.net/npm/three-globe@2.45.6/example/img/';
 const DAY = `${IMG}earth-blue-marble.jpg`;
@@ -257,17 +258,20 @@ export function createGlobeScene({ container, onSelect, onFail }) {
     const { city, node } = pin;
     const celsius = city.record?.temperatureCelsius;
     const kind = conditionKind(city.record?.description, isDaylight(city.lat, city.lng, sun));
+    const favourite = isFavourite(lastFavourites, city);
     clear(node);
     node.append(
       icon(kind),
+      favourite ? el('span', { class: 'pin-star', 'aria-hidden': 'true' }, '★') : null,
       el('span', { class: 'pin-temp' }, formatTemp(celsius, unit)),
       el('span', { class: 'pin-name' }, sanitize(city.name)),
     );
     node.style.setProperty('--pc', temperatureColor(celsius));
     node.setAttribute(
       'aria-label',
-      `${sanitize(city.name)}, ${formatTemp(celsius, unit)}, ${sanitize(city.record?.description) || 'no conditions'}`,
+      `${sanitize(city.name)}, ${formatTemp(celsius, unit)}, ${sanitize(city.record?.description) || 'no conditions'}${favourite ? ', favourite' : ''}`,
     );
+    node.classList.toggle('favourite', favourite);
     node.classList.toggle('selected', city.key === selectedKey);
   }
 
@@ -277,6 +281,7 @@ export function createGlobeScene({ container, onSelect, onFail }) {
   }
 
   let lastUnit = 'C';
+  let lastFavourites = [];
 
   return {
     get shaded() {
@@ -284,8 +289,9 @@ export function createGlobeScene({ container, onSelect, onFail }) {
     },
     shaderReady,
     sun: () => sun,
-    setCities(cities, unit) {
+    setCities(cities, unit, favourites) {
       lastUnit = unit;
+      if (favourites) lastFavourites = favourites;
       const seen = new Set();
       for (const city of cities) {
         if (!city.onGlobe) continue;
