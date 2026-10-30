@@ -9,3 +9,6 @@ weather.db-wal
 .idea/
 .vscode/
 .DS_Store
+
+### AI-DLC parallel mode (per-worktree marker, never merged) ###
+.aidlc-feature

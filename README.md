@@ -36,6 +36,12 @@ cargo fmt --check
 cargo clippy --all-targets --all-features -- -D warnings
 ```
 
+Set `PORT` to listen on a different port (default `8080`):
+
+```bash
+PORT=8081 cargo run
+```
+
 Set `DATABASE_URL` to use a different SQLite file:
 
 ```bash
@@ -165,3 +171,10 @@ weather-api/
 ├── Cargo.toml
 └── README.md
 ```
+
+## Parallel AI-DLC Features
+
+Several AI-DLC agents can build features at the same time, one per git worktree. The orchestrator creates each worktree with a git-ignored `.aidlc-feature` marker (feature id, branch, port, base). The agent then follows `.aidlc-rule-details/common/parallel-features.md`, keeping its state, audit log and claims under `aidlc-docs/features/<feature-id>/`.
+
+- `scripts/aidlc-claims-check.sh` compares this feature's claimed files, routes, tables and migrations with every other active worktree.
+- `scripts/aidlc-index.sh` regenerates `aidlc-docs/features/INDEX.md` on `main` after a merge.

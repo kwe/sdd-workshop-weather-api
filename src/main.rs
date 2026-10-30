@@ -13,7 +13,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let database_url =
         std::env::var("DATABASE_URL").unwrap_or_else(|_| "sqlite://weather.db".to_owned());
     let pool = db::connect(&database_url).await?;
-    let address = SocketAddr::from(([0, 0, 0, 0], 8080));
+    let port = std::env::var("PORT")
+        .ok()
+        .and_then(|value| value.parse::<u16>().ok())
+        .unwrap_or(8080);
+    let address = SocketAddr::from(([0, 0, 0, 0], port));
     let listener = tokio::net::TcpListener::bind(address).await?;
 
     tracing::info!("Weather API listening on http://{address}");

@@ -64,3 +64,6 @@ Cycle 1 artefacts above are preserved unchanged. Cycle 2 artefacts use `globe-fr
 - [x] Code Generation - plan approved 2026-10-30T11:45:03Z; generated (code summary: aidlc-docs/construction/globe-frontend/code/code-summary.md)
 - [x] Build and Test - executed, all checks pass (aidlc-docs/construction/build-and-test/globe-frontend-build-and-test-summary.md); approved 2026-10-30T12:06:02Z (user independently verified; committed as 92a457d)
 - [x] Operations - PLACEHOLDER (no activities; Cycle 2 complete)
+
+## Cycle 3+: Parallel Feature Mode (from 2026-10-30T12:55:40Z)
+Features now run in parallel git worktrees. Per-feature state and audit live in `aidlc-docs/features/<feature-id>/`; see `aidlc-docs/features/INDEX.md` (generated). This file and `audit.md` are now owned by `main` and are not edited by feature agents.
