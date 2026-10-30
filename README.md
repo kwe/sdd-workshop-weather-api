@@ -119,6 +119,15 @@ SQLite-backed repository using an in-memory database:
 cargo test
 ```
 
+## Frontend (Weather Globe)
+
+Open `http://localhost:8080/` for an interactive 3D globe. Drag to rotate, scroll or pinch to zoom, and click a pin (or a city in the list) to fly to it and see current conditions plus the 5-day forecast. The UI reads only `GET /api/weather` and `GET /api/weather/forecast/{city}`; it refreshes every 60 seconds and supports °C/°F, search (`/`), and reduced-motion preferences.
+
+- **No build step**: static HTML/CSS/ES modules in `static/` are embedded into the binary (rebuild after editing them).
+- **CDN dependencies**: globe.gl 2.46.2 (SRI-pinned) and Earth textures (three-globe 2.45.6) load from `cdn.jsdelivr.net`, so the globe needs internet access; without it the city list still works.
+- **City placement**: the API has no coordinates, so cities are matched against a built-in gazetteer (`static/js/gazetteer.js`). Cities not in it appear in the list as "not on globe".
+- **Security**: `/` and `/static/*` send a strict Content-Security-Policy (see `src/frontend.rs`); API responses are unchanged. All API text is rendered as text, never as HTML.
+
 ## Workshop Challenge
 
 Using the SDD framework of your choice, plan and implement one of these
@@ -138,14 +147,21 @@ weather-api/
 ├── src/
 │   ├── db.rs
 │   ├── error.rs
+│   ├── frontend.rs
 │   ├── handlers.rs
 │   ├── lib.rs
 │   ├── main.rs
 │   ├── models.rs
 │   ├── repository.rs
 │   └── service.rs
+├── static/
+│   ├── index.html
+│   ├── favicon.svg
+│   ├── css/app.css
+│   └── js/            (main, state, api, gazetteer, weather, sun, dom, globe-scene, ui)
 ├── tests/
-│   └── api.rs
+│   ├── api.rs
+│   └── frontend.rs
 ├── Cargo.toml
 └── README.md
 ```

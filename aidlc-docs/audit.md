@@ -157,3 +157,82 @@
 **Context**: Post-workflow minimal-depth fix.
 
 ---
+
+## New Request Cycle 2 (Globe Frontend) - Workspace Detection
+**Timestamp**: 2026-10-30T11:33:30Z
+**User Input**: "Using AI-DLC, begin a new request on this project (the previous 5-day forecast workflow is complete — see aidlc-docs/aidlc-state.md; treat this as a new feature on top of it and keep the existing artefacts).\n\nRequest (from the product owner, verbatim): \"let's add a frontend to this api. Make a interractive globe view of the world which the user can rotate and zoom into. Impress me. Add the weather from the api.\"\n\nDecisions already made by the product owner:\n- A single-page web frontend served by the existing Axum app at / (static HTML/JS/CSS shipped in the repo, no separate Node build step).\n- Loading three.js / globe.gl and Earth textures from a public CDN is approved.\n- It must show data from the existing API: current weather records (GET /api/weather) and the 5-day forecast (GET /api/weather/forecast/{city}). The API has no coordinates.\n- The bar is high: it should be visually impressive and polished, not a basic demo.\n- Existing API behaviour and tests must not change.\n\nRead the existing codebase and aidlc-docs, then run the AI-DLC workflow for this request."
+**AI Response**: Displayed welcome message; loaded common rules and extension opt-in prompts; read src/, migrations/, tests/, aidlc-state.md and prior audit. Existing aidlc-state.md found: prior cycle complete. Brownfield; reverse-engineering artifacts exist, so Reverse Engineering is skipped (the only delta is the forecast feature, documented in cycle 1 artefacts). Existing artefacts preserved; cycle-2 artefacts use new file names.
+**Context**: Workspace Detection complete; proceeding to Requirements Analysis (Standard depth).
+
+---
+
+## Cycle 2 - Requirements Analysis (questions)
+**Timestamp**: 2026-10-30T11:35:00Z
+**AI Response**: Intent analysis: New Feature, multiple components (static frontend + new Axum routes), Moderate complexity, Standard depth. Created aidlc-docs/inception/requirements/globe-frontend-requirement-questions.md (13 questions incl. extension opt-ins). Waiting for user answers.
+**Context**: Requirements Analysis gate - awaiting answers.
+
+---
+
+## Cycle 2 - Requirements Analysis (answers received)
+**Timestamp**: 2026-10-30T11:35:17Z
+**User Input**: "I've filled in the answers in globe-frontend-requirement-questions.md, please proceed."
+**AI Response**: Read answers: Q1 A, Q2 D (+A extras), Q3 B, Q4 A, Q5 X (A + drifting cloud layer, no wind particles), Q6 A, Q7 A, Q8 A, Q9 A, Q10 A, Q11 X (no full security extension; explicit XSS-safe rendering + CSP header requirements), Q12 B, Q13 C. No contradictions. Generated globe-frontend-requirements.md. Approval prompt logged.
+**Context**: Requirements Analysis complete; awaiting approval (User Stories stage currently proposed as skipped/to be assessed in Workflow Planning).
+
+---
+
+## Cycle 2 - Requirements Approval
+**Timestamp**: 2026-10-30T11:36:07Z
+**User Input**: "Approve & Continue. For workflow planning: keep Application Design and Functional Design (frontend architecture, CSP, gazetteer, visuals); skip User Stories, Units Generation, NFR and Infrastructure stages."
+**AI Response**: Requirements approved. Created globe-frontend-execution-plan.md: EXECUTE Application Design (standard), Functional Design, Code Generation, Build and Test; SKIP Reverse Engineering (exists), User Stories, Units Generation, NFR Requirements, NFR Design, Infrastructure Design. Mermaid validated (alphanumeric IDs, valid links); text alternative included. Approval prompt logged.
+**Context**: Workflow Planning complete; awaiting approval.
+
+---
+
+## Cycle 2 - Workflow Planning Approval
+**Timestamp**: 2026-10-30T11:36:51Z
+**User Input**: "Approve & Continue."
+**AI Response**: Plan approved. Started Application Design (standard depth): created globe-frontend-application-design-plan.md with 10 design questions and artefact checklist. Waiting for answers.
+**Context**: Application Design Part A - awaiting answers.
+
+---
+
+## Cycle 2 - Application Design Answers and Artefacts
+**Timestamp**: 2026-10-30T11:37:36Z
+**User Input**: "Use defaults: answer A for all 10 questions (please record A in each [Answer]: tag). One addition for Q5: include ocean specular highlights, a soft twilight band at the terminator, and a Fresnel atmosphere glow, so the result looks premium. Then proceed."
+**AI Response**: Recorded A in all 10 tags (Q5 annotated with the addition). Verified on jsDelivr: globe.gl 2.46.2 UMD (SRI computable, CORS ok) and three-globe@2.45.6 example textures (day, night, topology, water mask, sky) exist; no cloud texture exists, so clouds are procedural. The UMD bundle exposes no THREE global, so effects use onBeforeCompile on the globe material (fallback: import map + CSP hash, to be raised with the user first).
+**Context**: Application Design Part A answers recorded.
+
+---
+
+## Cycle 2 - Application Design Generation
+**Timestamp**: 2026-10-30T11:39:17Z
+**User Input**: "I denied that command: it touched audit.md outside the project (../../audit.md). Use absolute paths inside /Users/evanke02/Github/course/weather-api only; the audit log is weather-api/aidlc-docs/audit.md. Please continue generating the application design artefacts."
+**AI Response**: Acknowledged; re-ran using absolute in-project paths and file tools only. Generated globe-frontend-{components,component-methods,services,component-dependency,application-design}.md in aidlc-docs/inception/application-design/ (Mermaid validated: alphanumeric IDs, valid edges, text alternatives included). Approval prompt logged.
+**Context**: Application Design complete; awaiting approval.
+
+---
+
+## Cycle 2 - Application Design Approval and Functional Design
+**Timestamp**: 2026-10-30T11:40:21Z
+**User Input**: "Approve & Continue. Pre-approved: if onBeforeCompile patching fails, switch to the import-map + CSP script-hash fallback without asking. For Functional Design, if you have questions, put sensible defaults and I'll review."
+**AI Response**: Application Design approved. Recorded the pre-approved fallback (BR-2.3, BR-7.5). Created globe-frontend-functional-design-plan.md with 12 questions, each pre-filled with an AI-proposed default (A) for the user to review, and generated business-logic-model.md, business-rules.md, domain-entities.md and frontend-components.md in aidlc-docs/construction/globe-frontend/functional-design/ (Mermaid validated, text alternatives included). Design refinement: conditionKind takes an isDay flag (moon icon). Approval prompt logged.
+**Context**: Functional Design complete; awaiting review/approval.
+
+---
+
+## Cycle 2 - Functional Design Approval and Code Generation Planning
+**Timestamp**: 2026-10-30T11:43:54Z
+**User Input**: "Continue to Next Stage. For the code generation plan gate I'll approve; then generate the code and run Build and Test (including a live run with headless-browser screenshot if available; Chrome is likely at /Applications/Google Chrome.app). Don't commit."
+**AI Response**: Functional Design approved (including the 12 AI-proposed defaults). Created aidlc-docs/construction/plans/globe-frontend-code-generation-plan.md (10 steps). Approval prompt for the plan logged; awaiting explicit approval. Constraint noted: do not commit.
+**Context**: Code Generation Part 1 (Planning), approval gate.
+
+---
+
+## Cycle 2 - Code Generation Plan Approval, Generation, Build and Test
+**Timestamp**: 2026-10-30T11:45:03Z
+**User Input**: "Continue to Next Stage. Generate the code, then proceed straight through Build and Test (pre-approved) and report results with the screenshot path."
+**AI Response**: Plan approved. Generated src/frontend.rs, static/ (index.html, css, favicon, 9 JS modules), tests/frontend.rs; modified src/lib.rs and README.md. Fmt, clippy -D warnings and cargo test pass (27 tests: 21 existing unchanged + 6 new). Live headless-Chrome run: shader patch worked (import-map fallback not needed), no CSP violations, XSS probe rendered as text. Tuned specular and cloud parameters after screenshots. Wrote code-summary.md and globe-frontend-build-and-test-summary.md. Nothing committed per user instruction.
+**Context**: Code Generation complete; Build and Test complete (pre-approved by user). Awaiting approval to proceed to Operations (placeholder).
+
+---

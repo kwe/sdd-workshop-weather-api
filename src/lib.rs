@@ -1,5 +1,6 @@
 pub mod db;
 pub mod error;
+pub mod frontend;
 pub mod handlers;
 pub mod models;
 pub mod repository;
@@ -45,5 +46,6 @@ pub fn app(pool: SqlitePool) -> Router {
             "/swagger-ui.html",
             get(|| async { axum::response::Redirect::temporary("/swagger-ui/") }),
         )
+        .merge(frontend::router())
         .with_state(pool)
 }
