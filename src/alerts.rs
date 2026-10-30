@@ -226,9 +226,11 @@ async fn list_forecast_entries(pool: &SqlitePool) -> Result<Vec<ForecastEntry>, 
 }
 
 pub async fn get_alerts(pool: &SqlitePool, today: NaiveDate) -> Result<Vec<Alert>, ApiError> {
-    let thresholds = list_thresholds(pool).await?;
-    let records = repository::list_weather_records(pool, None).await?;
-    let forecasts = list_forecast_entries(pool).await?;
+    let (thresholds, records, forecasts) = tokio::try_join!(
+        list_thresholds(pool),
+        repository::list_weather_records(pool, None),
+        list_forecast_entries(pool),
+    )?;
     Ok(evaluate(&thresholds, &records, &forecasts, today))
 }
 

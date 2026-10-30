@@ -326,7 +326,7 @@ export function createUi({ getSun, actions }) {
         'div',
         { class: 'current-main' },
         icon(conditionKind(r.description, day)),
-        el('div', null, el('div', { class: 'big-temp' }, formatTemp(r.temperatureCelsius, state.unit, 1)), el('div', { class: 'desc' }, sanitize(r.description, 120) || 'No description')),
+        el('div', null, el('div', { class: 'big-temp' }, formatTemp(r.temperatureCelsius, state.unit)), el('div', { class: 'desc' }, sanitize(r.description, 120) || 'No description')),
       ),
       el(
         'div',
