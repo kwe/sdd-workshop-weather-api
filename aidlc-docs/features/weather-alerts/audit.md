@@ -58,3 +58,35 @@ No BLOCKING or SHARED-FILE overlaps visible yet (the other feature has not publi
 **Context**: CONSTRUCTION - Functional Design, approval gate.
 
 ---
+
+## Functional Design - Approval
+**Timestamp**: 2026-10-30T13:04:16Z
+**User Input**: "Functional design approved, with one coordination note from the orchestrator: the parallel 'favourites' feature also touches static/js/globe-scene.js. You own the ring layer (selection ring + alert rings) - keep your globe-scene.js change a small, additive hook (e.g. a setAlertRings(list) function whose data is concatenated with the existing selection ring), don't restructure existing code. Favourites will NOT use rings; it will change pin colour/size and add a star label. Continue: re-run the claims check (the other feature has now published claims) and write the Code Generation plan."
+**Status**: Approved
+**Context**: Functional Design complete.
+
+---
+
+## Claims and Overlap Check #2 (before Code Generation)
+**Timestamp**: 2026-10-30T13:05:00Z
+**AI Response**: Output of scripts/aidlc-claims-check.sh:
+```
+SHARED-FILE [favourites] file: README.md
+SHARED-FILE [favourites] file: src/frontend.rs
+SHARED-FILE [favourites] file: src/lib.rs
+SHARED-FILE [favourites] file: static/css/app.css
+SHARED-FILE [favourites] file: static/index.html
+RESULT: shared files only (allowed; keep edits minimal and additive)
+exit=0
+```
+No BLOCKING overlap (route/table/migration distinct). Shared files listed under `## Coordination` in the code generation plan; globe-scene.js hook kept additive per orchestrator note.
+**Context**: CONSTRUCTION - claims step.
+
+---
+
+## Code Generation - Plan Presented
+**Timestamp**: 2026-10-30T13:05:00Z
+**AI Prompt**: "Ready to proceed with the 25-step code generation plan?" (construction/plans/weather-alerts-code-generation-plan.md)
+**Context**: CONSTRUCTION - Code Generation Part 1, awaiting approval.
+
+---

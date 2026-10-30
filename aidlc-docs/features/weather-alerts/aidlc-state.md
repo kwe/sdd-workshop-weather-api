@@ -1,6 +1,6 @@
 # AI-DLC State: weather-alerts
 
-- **Current Stage**: CONSTRUCTION - Functional Design (awaiting approval)
+- **Current Stage**: CONSTRUCTION - Code Generation Part 1 Planning (awaiting approval)
 - **Status**: awaiting-approval
 
 ## Project Information
@@ -27,8 +27,9 @@
 - [ ] Units Generation - SKIP (single unit `weather-alerts`)
 
 ### CONSTRUCTION PHASE
-- [ ] Functional Design - artifacts created, awaiting approval: construction/weather-alerts/functional-design/
+- [x] Functional Design - approved 2026-10-30T13:04:16Z: construction/weather-alerts/functional-design/
 - [ ] NFR Requirements / NFR Design / Infrastructure Design - SKIP
-- [x] Claims + overlap check #1 - 2026-10-30 (INFO: no other active feature claims found; exit 0). Repeat before Code Generation.
-- [ ] Code Generation
+- [x] Claims + overlap check #1 - 2026-10-30 (INFO: no other active feature claims found; exit 0). 
+- [x] Claims + overlap check #2 - 2026-10-30: SHARED-FILE with favourites (README.md, src/frontend.rs, src/lib.rs, static/css/app.css, static/index.html); no BLOCKING
+- [ ] Code Generation - plan awaiting approval: construction/plans/weather-alerts-code-generation-plan.md
 - [ ] Build and Test (strengthened parallel gate)
