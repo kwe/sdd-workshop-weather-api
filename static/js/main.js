@@ -1,6 +1,7 @@
 import { getState, setState, subscribe } from './state.js';
-import { ApiNotFound, addFavourite, getFavourites, getForecast, getWeather, removeFavourite } from './api.js';
+import { ApiNotFound, addFavourite, getAlerts, getFavourites, getForecast, getWeather, removeFavourite } from './api.js';
 import { isFavourite } from './favourites.js';
+import { groupByCity, ringList } from './alerts.js';
 import { locate, normalize, normalizeCountry } from './gazetteer.js';
 import { createGlobeScene } from './globe-scene.js';
 import { createUi } from './ui.js';
@@ -11,6 +12,7 @@ const NONE_TTL_MS = 60_000;
 
 let scene = null;
 let weatherInFlight = false;
+let alertsInFlight = false;
 let forecastController = null;
 
 function buildCities(records) {
@@ -109,6 +111,21 @@ async function toggleFavourite(key, ui) {
   }
 }
 
+async function refreshAlerts(ui) {
+  if (alertsInFlight) return;
+  alertsInFlight = true;
+  try {
+    const alerts = await getAlerts();
+    const prev = getState().alerts.length;
+    setState({ alerts, alertsStatus: 'ok' });
+    if (alerts.length !== prev) ui.announce(`${alerts.length} active weather ${alerts.length === 1 ? 'alert' : 'alerts'}`);
+  } catch {
+    setState({ alerts: [], alertsStatus: 'error' });
+  } finally {
+    alertsInFlight = false;
+  }
+}
+
 async function loadForecast(key, ui, force = false) {
   const state = getState();
   const city = state.cities.find((c) => c.key === key);
@@ -177,6 +194,7 @@ function boot() {
 
   subscribe((state, patch) => {
     ui.render(state);
+    if (scene && 'alerts' in patch) scene.setAlertRings(ringList(groupByCity(state.alerts)));
     if (scene && ('cities' in patch || 'unit' in patch || 'favourites' in patch)) {
       scene.setCities(state.cities, state.unit, state.favourites);
     }
@@ -195,13 +213,18 @@ function boot() {
 
   ui.render(getState());
   refreshWeather(ui);
+  refreshAlerts(ui);
   setInterval(() => {
     if (document.hidden) return;
     refreshWeather(ui);
+    refreshAlerts(ui);
     scene?.refreshSun(getState().cities);
   }, REFRESH_MS);
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) refreshWeather(ui);
+    if (!document.hidden) {
+      refreshWeather(ui);
+      refreshAlerts(ui);
+    }
   });
 }
 

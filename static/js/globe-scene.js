@@ -124,7 +124,7 @@ export function createGlobeScene({ container, onSelect, onFail }) {
     .htmlTransitionDuration(0)
     .ringLat((d) => d.lat)
     .ringLng((d) => d.lng)
-    .ringColor(() => (t) => `rgba(90, 169, 255, ${(1 - t) * 0.9})`)
+    .ringColor((d) => (t) => `rgba(${d.alertRgb ?? '90, 169, 255'}, ${(1 - t) * 0.9})`)
     .ringMaxRadius(4)
     .ringPropagationSpeed(2.4)
     .ringRepeatPeriod(1600)
@@ -277,7 +277,26 @@ export function createGlobeScene({ container, onSelect, onFail }) {
 
   function syncRings() {
     const target = pinList.find((p) => p.key === selectedKey);
-    globe.ringsData(target && !reduced ? [target] : []);
+    const alertRings = reduced
+      ? []
+      : alertGroups.flatMap((g) => {
+          const pin = pins.get(g.key);
+          return pin ? [{ lat: pin.lat, lng: pin.lng, alertRgb: g.rgb }] : [];
+        });
+    globe.ringsData([...(target && !reduced ? [target] : []), ...alertRings]);
+  }
+
+  let alertGroups = [];
+
+  // Static (non-animated) marker so alerts stay visible under reduced motion.
+  function applyAlertPins() {
+    const byKey = new Map(alertGroups.map((g) => [g.key, g]));
+    for (const pin of pins.values()) {
+      const group = byKey.get(pin.key);
+      pin.node.classList.toggle('has-alert', Boolean(group));
+      if (group) pin.node.style.setProperty('--alert-color', group.color);
+      else pin.node.style.removeProperty('--alert-color');
+    }
   }
 
   let lastUnit = 'C';
@@ -308,6 +327,12 @@ export function createGlobeScene({ container, onSelect, onFail }) {
       for (const key of [...pins.keys()]) if (!seen.has(key)) pins.delete(key);
       pinList = [...pins.values()];
       globe.htmlElementsData(pinList);
+      applyAlertPins();
+      syncRings();
+    },
+    setAlertRings(groups) {
+      alertGroups = groups;
+      applyAlertPins();
       syncRings();
     },
     setUnit(unit, cities) {

@@ -32,6 +32,12 @@ export async function getWeather(signal) {
   return data;
 }
 
+export async function getAlerts(signal) {
+  const data = await getJson('/api/alerts', signal);
+  if (!Array.isArray(data)) throw new ApiError('unexpected response');
+  return data;
+}
+
 export async function getForecast(city, signal) {
   const data = await getJson(`/api/weather/forecast/${encodeURIComponent(city)}`, signal);
   if (!Array.isArray(data)) throw new ApiError('unexpected response');

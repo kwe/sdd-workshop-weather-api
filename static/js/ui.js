@@ -13,6 +13,7 @@ import {
 } from './weather.js';
 import { isDaylight } from './sun.js';
 import { favouriteItems, isFavourite } from './favourites.js';
+import { cityKeyOf, collapseBanner, renderAlertsBanner, renderCityAlerts } from './alerts.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -26,6 +27,8 @@ export function createUi({ getSun, actions }) {
     sub: $('detail-sub'),
     note: $('detail-note'),
     current: $('current'),
+    alertsBanner: $('alerts-banner'),
+    cityAlerts: $('city-alerts'),
     forecast: $('forecast-body'),
     banner: $('banner'),
     live: $('live'),
@@ -72,6 +75,8 @@ export function createUi({ getSun, actions }) {
       if (inInput && nodes.search.value) {
         nodes.search.value = '';
         actions.onQuery('');
+      } else if (collapseBanner(nodes.alertsBanner)) {
+        nodes.alertsBanner.querySelector('.alerts-toggle')?.focus();
       } else if (!nodes.detail.hidden) {
         actions.onClose();
         focusReturn?.focus?.();
@@ -304,7 +309,7 @@ export function createUi({ getSun, actions }) {
       return;
     }
     const entry = state.forecasts.get(shown.key);
-    const sig = JSON.stringify([shown.key, state.unit, entry?.status, entry?.data, shown.record, !city]);
+    const sig = JSON.stringify([shown.key, state.unit, entry?.status, entry?.data, shown.record, !city, state.alerts]);
     if (sig === detailSig && !nodes.detail.hidden) return;
     const reopen = nodes.detail.hidden;
     detailSig = sig;
@@ -331,6 +336,11 @@ export function createUi({ getSun, actions }) {
         statBlock('Recorded', formatRecordedAt(r.recordedAt), true),
       ),
     );
+    renderCityAlerts(
+      nodes.cityAlerts,
+      state.alerts.filter((a) => cityKeyOf(a) === shown.key),
+      state.unit,
+    );
     renderForecast(entry, state.unit, shown);
     if (reopen) nodes.detail.scrollTop = 0;
   }
@@ -347,6 +357,7 @@ export function createUi({ getSun, actions }) {
       renderDetail(state);
       renderFavourites(state);
       renderStar(state);
+      renderAlertsBanner(nodes.alertsBanner, state, actions.onSelect);
     },
     showFallbackNote(message) {
       nodes.banner.hidden = false;

@@ -69,6 +69,7 @@ OpenAPI JSON: `http://localhost:8080/v3/api-docs`
 | GET | `/api/weather/{id}` | Get a single weather record by ID |
 | POST | `/api/weather` | Create a new weather record |
 | DELETE | `/api/weather/{id}` | Delete a weather record by ID |
+| GET | `/api/alerts` | Active weather alerts from current records and forecasts |
 | GET | `/api/weather/forecast/{city}` | 5-day forecast (today through today + 4, UTC dates), city case-insensitive |
 | GET | `/api/favourites` | List favourite cities (newest first) with each city's latest weather |
 | POST | `/api/favourites` | Favourite a city (`{"city":"London"}`): 201 created, 200 already a favourite |
@@ -136,6 +137,10 @@ Open `http://localhost:8080/` for an interactive 3D globe. Drag to rotate, scrol
 - **CDN dependencies**: globe.gl 2.46.2 (SRI-pinned) and Earth textures (three-globe 2.45.6) load from `cdn.jsdelivr.net`, so the globe needs internet access; without it the city list still works.
 - **City placement**: the API has no coordinates, so cities are matched against a built-in gazetteer (`static/js/gazetteer.js`). Cities not in it appear in the list as "not on globe".
 - **Security**: `/` and `/static/*` send a strict Content-Security-Policy (see `src/frontend.rs`); API responses are unchanged. All API text is rendered as text, never as HTML.
+
+### Weather Alerts
+
+`GET /api/alerts` evaluates every city's latest weather record (and its 5-day forecast highs/lows) against the thresholds in the `alert_thresholds` table and returns the active alerts as `[{city, country, type, severity, value, threshold, source, date}]` (`type`: heat, cold, wind, humidity; `severity`: watch, warning, severe; `source`: current, forecast). Defaults: heat >= 30 C, cold <= 0 C, wind >= 40 km/h, humidity >= 85%. Edit the table to tune them. On the globe, alerting cities get a pulsing ring coloured by worst severity (a static ring under reduced motion), the detail panel lists the city's alerts, and the alerts banner flies to a city when an item is clicked. Alerts refresh on the existing 60-second cycle.
 
 ## Workshop Challenge
 
