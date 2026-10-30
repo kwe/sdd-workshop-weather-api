@@ -117,3 +117,11 @@ No BLOCKING. Coordination section updated (10 shared files; no ringsData use; go
 **Context**: Post-merge defect fix; status awaiting-approval.
 
 ---
+
+## Post-merge defect fix - Approval
+**Timestamp**: 2026-10-30T13:27:29Z
+**User Input**: "Post-merge fix 5e3d12a approved (orchestrator verified: tests pass, real-browser check shows no 'null' labels; merged as e353ad1). Log the approval, set Status: complete, commit on your branch, stop."
+**AI Response**: Logged approval; set Status: complete. Committed on feature/favourites; not merged or pushed.
+**Context**: Post-merge defect closed.
+
+---
