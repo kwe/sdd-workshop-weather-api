@@ -130,3 +130,11 @@ No BLOCKING overlaps. All listed files remain additive-hook-only edits. No merge
 **Context**: Build and Test, Status awaiting-approval.
 
 ---
+
+## Build and Test - second rebase
+**Timestamp**: 2026-10-30T13:25:00Z
+**User Input**: (none; main moved after favourites merged)
+**AI Response**: Rebased onto 36ca732. Conflicted files: src/frontend.rs, src/lib.rs, static/js/main.js, static/js/state.js, static/js/ui.js; resolved preserving both features. fmt, clippy, full tests green; live check on 8082 OK, server stopped.
+**Context**: Build and Test, Status awaiting-approval.
+
+---

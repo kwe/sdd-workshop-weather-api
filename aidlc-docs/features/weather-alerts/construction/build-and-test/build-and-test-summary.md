@@ -1,18 +1,21 @@
 # Build and Test Summary - weather-alerts
 
-Branch `feature/weather-alerts`, rebased onto `main` (188dbaf). The rebase was clean (no conflicted files); the cherry-picked claims-script fix was skipped as already upstream.
+Branch `feature/weather-alerts`, rebased twice. The first rebase (onto 188dbaf) was clean. `main` then moved (favourites merged, 36ca732), so I rebased again.
+
+Second rebase conflicts (all resolved keeping BOTH features; nothing of favourites dropped):
+`src/frontend.rs` (asset list), `src/lib.rs` (paths, schemas, tags), `static/js/main.js` (imports, helper functions, subscribe), `static/js/state.js`, `static/js/ui.js` (import, render calls). `globe-scene.js`, `api.js`, `index.html` and `app.css` merged automatically. Gate and live check re-run after this rebase.
 
 ## Results
 | Command | Result |
 | --- | --- |
 | `cargo fmt --check` | OK |
 | `cargo clippy --all-targets --all-features -- -D warnings` | Finished, no warnings |
-| `cargo test` (full) | all suites pass: 15 lib (unit), 13 `alerts`, 5 `alerts_frontend`, 17 + 6 existing suites, 0 failures |
+| `cargo test` (full) | all suites pass: 15 lib (unit), 13 `alerts`, 5 `alerts_frontend`, 17 + 8 + 7 existing suites (incl. favourites), 0 failures |
 
 ## Live check (PORT=8082, fresh temporary DB, server stopped afterwards)
 - `GET /api/alerts` -> 200, 10 alerts. First entry:
   `{"city":"Mumbai","country":"India","type":"heat","severity":"watch","value":31.7,"threshold":30.0,"source":"current","date":"2026-07-17"}`
-- `GET /` -> 200. `GET /v3/api-docs` contains `/api/alerts`.
+- `GET /api/favourites` -> 200 (favourites coexists). `GET /` -> 200. `GET /v3/api-docs` contains `/api/alerts`.
 - Not verified: the globe UI in a real browser (rings, banner, reduced motion); only static checks cover it.
 
 ## Seed alert count: design said 12, code yields 10
