@@ -18,6 +18,15 @@ pub async fn get_forecast(
             "No forecast found for city {display}"
         )));
     }
+    let complete = rows.len() == 5
+        && rows
+            .iter()
+            .enumerate()
+            .all(|(index, row)| row.day_offset == index as i32);
+    if !complete {
+        tracing::error!(city = %key, rows = rows.len(), "forecast data is incomplete");
+        return Err(ApiError::internal());
+    }
     Ok(rows
         .into_iter()
         .map(|row| to_forecast_day(row, today))

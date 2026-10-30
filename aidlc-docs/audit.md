@@ -142,3 +142,18 @@
 **Context**: Operations placeholder; workflow complete.
 
 ---
+
+## Post-Workflow Change Request - Code Review Fixes (minimal depth)
+**Timestamp**: 2026-10-30T11:29:35Z
+**User Input**: "Using AI-DLC, a code review found two issues in the forecast feature. This is a simple fix, use minimal depth. 1) Medium — src/service.rs get_forecast: if 1–4 forecast rows exist for a city it returns 200 with a short array, violating FR-1 (exactly 5 days). Require exactly five rows with day_offset 0..=4; if rows exist but violate that, return an internal-server-error ApiError (generic message, no data leakage) rather than a partial 200. Zero rows stays 404. Add a test that deletes one seeded row and asserts the 500 standard error body. 2) Low — tests/api.rs (~lines 229-237) rolling-date test: the UTC-midnight tolerance is reversed (if midnight passes between the handler computing today and the test reading Utc::now(), the response is 'yesterday' relative to the assertion). Capture the UTC date immediately before and after the request and accept either as the baseline, then verify consecutive offsets from it. Existing tests must remain passing; fmt and clippy -D warnings must be clean. Do not commit."
+**AI Response**: Treated as a minimal-depth bug-fix change; skipping design stages, applying directly to code and tests.
+**Context**: Post-completion fix, Code Generation (minimal).
+
+---
+
+## Code Review Fixes - Complete
+**Timestamp**: 2026-10-30T11:40:00Z
+**AI Response**: Applied both fixes; fmt, clippy and tests pass (4 unit, 17 integration). Not committed. Summary appended to code-summary.md.
+**Context**: Post-workflow minimal-depth fix.
+
+---

@@ -17,3 +17,9 @@
 
 ## Verification
 `cargo fmt`, `cargo clippy --all-targets --all-features -- -D warnings` clean; `cargo test`: 4 unit + 16 integration tests pass.
+
+## Code Review Fixes (post-workflow, minimal depth)
+- `src/service.rs`: `get_forecast` requires exactly 5 rows with `day_offset` 0..=4; otherwise logs and returns a generic 500 (`ApiError::internal()`, now `pub` in `src/error.rs`). Zero rows still 404.
+- `src/handlers.rs`: OpenAPI documents the 500 response.
+- `tests/api.rs`: new test deleting one seeded row asserts the 500 standard body; rolling-date test now captures UTC date before/after the request and checks consecutive offsets from that baseline.
+- Result: fmt and clippy `-D warnings` clean; 4 unit + 17 integration tests pass.

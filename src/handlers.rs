@@ -67,7 +67,8 @@ pub async fn get_weather_record(
     responses(
         (status = 200, description = "Five daily forecasts ordered by date", body = [ForecastDay]),
         (status = 400, description = "City is blank", body = ErrorResponse),
-        (status = 404, description = "No forecast found for city", body = ErrorResponse)
+        (status = 404, description = "No forecast found for city", body = ErrorResponse),
+        (status = 500, description = "Forecast data incomplete or database error", body = ErrorResponse)
     )
 )]
 pub async fn get_forecast(

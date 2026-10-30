@@ -221,21 +221,22 @@ async fn defaults_recorded_at_when_it_is_omitted() {
 #[tokio::test]
 async fn returns_five_day_forecast_with_rolling_dates() {
     let app = test_app().await;
+    let before = chrono::Utc::now().date_naive();
     let response = request(app, "GET", "/api/weather/forecast/london", None).await;
+    let after = chrono::Utc::now().date_naive();
     assert_eq!(response.status(), StatusCode::OK);
     let body = response_json(response).await;
     let days = body.as_array().unwrap();
     assert_eq!(days.len(), 5);
-    let today = chrono::Utc::now().date_naive();
+    // The handler's "today" is either date if UTC midnight passed during the request.
+    let first = days[0]["date"].as_str().unwrap();
+    let baseline = [before, after]
+        .into_iter()
+        .find(|date| date.to_string() == first)
+        .unwrap_or_else(|| panic!("unexpected first date {first}"));
     for (offset, day) in days.iter().enumerate() {
-        let expected = today + chrono::Days::new(offset as u64);
-        let actual = day["date"].as_str().unwrap();
-        // Tolerate a UTC midnight rollover during the test run.
-        let tomorrow = expected + chrono::Days::new(1);
-        assert!(
-            actual == expected.to_string() || actual == tomorrow.to_string(),
-            "unexpected date {actual}"
-        );
+        let expected = baseline + chrono::Days::new(offset as u64);
+        assert_eq!(day["date"].as_str().unwrap(), expected.to_string());
         assert!(day["highTemperatureCelsius"].is_number());
         assert!(day["lowTemperatureCelsius"].is_number());
         assert!(day["conditions"].is_string());
@@ -390,4 +391,30 @@ async fn forecast_keys_match_rust_lowercase_and_constraints_hold() {
         .await
         .unwrap();
     assert_eq!(count, 10);
+}
+
+#[tokio::test]
+async fn incomplete_forecast_data_returns_internal_server_error() {
+    let pool: SqlitePool = SqlitePoolOptions::new()
+        .max_connections(1)
+        .connect("sqlite::memory:")
+        .await
+        .unwrap();
+    db::migrate(&pool).await.unwrap();
+    sqlx::query("DELETE FROM forecasts WHERE city_key = 'london' AND day_offset = 2")
+        .execute(&pool)
+        .await
+        .unwrap();
+    let app = app(pool);
+
+    let response = request(app.clone(), "GET", "/api/weather/forecast/london", None).await;
+    assert_eq!(response.status(), StatusCode::INTERNAL_SERVER_ERROR);
+    let body = response_json(response).await;
+    assert_eq!(body["status"], 500);
+    assert_eq!(body["error"], "Internal Server Error");
+    assert_eq!(body["message"], "An unexpected error occurred");
+    assert_eq!(body["path"], "/api/weather/forecast/london");
+
+    let response = request(app, "GET", "/api/weather/forecast/paris", None).await;
+    assert_eq!(response.status(), StatusCode::OK);
 }

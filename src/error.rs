@@ -30,7 +30,7 @@ impl ApiError {
         }
     }
 
-    fn internal() -> Self {
+    pub fn internal() -> Self {
         Self {
             status: StatusCode::INTERNAL_SERVER_ERROR,
             message: "An unexpected error occurred".to_owned(),
