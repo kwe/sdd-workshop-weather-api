@@ -1,7 +1,7 @@
 # AI-DLC State: favourites
 
 - **Feature**: favourites (branch `feature/favourites`, port 8081, base `main`)
-- **Current Stage**: Code Generation (complete)
+- **Current Stage**: Build and Test
 - **Status**: awaiting-approval
 - **Project Type**: Brownfield (code is source of truth; shared docs are read-only)
 - **Workspace Root**: /Users/evanke02/Github/course/weather-api-worktrees/favourites
@@ -22,5 +22,5 @@ Answered 2026-10-30T13:02:00Z (defaults accepted); all opted OUT, full rule file
 - [x] Workflow Planning - approved 2026-10-30T13:03:02Z
 - [x] Claims + overlap check - no BLOCKING; SHARED-FILE with weather-alerts: README.md, src/frontend.rs, src/lib.rs, static/css/app.css, static/index.html
 - [ ] Application Design - SKIP (proposed; folded into code generation plan)
-- [x] Code Generation - generated 2026-10-30; awaiting approval; plan approved 2026-10-30T13:04:40Z; claims re-checked (10 shared files, no blocking); generating
-- [ ] Build and Test (rebase + fmt/clippy/test + curl gate)
+- [x] Code Generation - approved 2026-10-30T13:09:24Z 2026-10-30T13:04:40Z; claims re-checked (10 shared files, no blocking); generating
+- [x] Build and Test - gate run 2026-10-30T13:11:00Z; awaiting approval

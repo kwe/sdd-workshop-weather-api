@@ -83,3 +83,17 @@ No BLOCKING. Coordination section updated (10 shared files; no ringsData use; go
 **Context**: Code Generation gate.
 
 ---
+
+## Code Generation - Approval
+**Timestamp**: 2026-10-30T13:09:24Z
+**User Input**: "Code reviewed - approved. Continue to the Build and Test gate exactly per parallel-features.md section 9 (commit, rebase onto main, fmt, clippy -D warnings, full cargo test, curl on PORT=8081, then stop the server)."
+**Context**: Code Generation approved.
+
+---
+
+## Build and Test gate
+**Timestamp**: 2026-10-30T13:11:00Z
+**AI Response**: Work already committed; `git rebase main` succeeded with no conflicts (skipped already-applied cherry-pick c85c614). fmt OK; clippy -D warnings OK; full cargo test: 4 + 17 + 8 + 7 passed, 0 failed. Server run on PORT=8081 with /tmp/favourites/w.db, all endpoints exercised with curl, server stopped, port closed. Details in construction/build-and-test/build-and-test-summary.md. Status set to awaiting-approval.
+**Context**: Build and Test gate; approval requested for merge.
+
+---
