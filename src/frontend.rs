@@ -56,6 +56,7 @@ pub const ASSETS: &[Asset] = &[
     asset!("js/dom.js", JS),
     asset!("js/globe-scene.js", JS),
     asset!("js/ui.js", JS),
+    asset!("js/favourites.js", JS),
 ];
 
 fn serve(asset: &'static Asset) -> Response {

@@ -1,5 +1,6 @@
 import { getState, setState, subscribe } from './state.js';
-import { ApiNotFound, getForecast, getWeather } from './api.js';
+import { ApiNotFound, addFavourite, getFavourites, getForecast, getWeather, removeFavourite } from './api.js';
+import { isFavourite } from './favourites.js';
 import { locate, normalize, normalizeCountry } from './gazetteer.js';
 import { createGlobeScene } from './globe-scene.js';
 import { createUi } from './ui.js';
@@ -46,6 +47,7 @@ function hhmm(date) {
 }
 
 async function refreshWeather(ui) {
+  loadFavourites();
   if (weatherInFlight) return;
   weatherInFlight = true;
   try {
@@ -76,6 +78,34 @@ async function refreshWeather(ui) {
     }
   } finally {
     weatherInFlight = false;
+  }
+}
+
+async function loadFavourites() {
+  try {
+    setState({ favourites: await getFavourites() });
+  } catch {
+    // keep the previous list; favourites are optional
+  }
+}
+
+async function toggleFavourite(key, ui) {
+  const state = getState();
+  const city = state.cities.find((c) => c.key === key);
+  if (!city || state.favouriteBusy) return;
+  const name = String(city.record?.city ?? city.name).trim();
+  const wasFavourite = isFavourite(state.favourites, city);
+  setState({ favouriteBusy: true });
+  try {
+    if (wasFavourite) await removeFavourite(name);
+    else await addFavourite(name);
+    await loadFavourites();
+    ui.announce(wasFavourite ? `Removed ${city.name} from favourites` : `Added ${city.name} to favourites`);
+  } catch (error) {
+    if (wasFavourite && error instanceof ApiNotFound) await loadFavourites();
+    else ui.announce(`Could not update favourites for ${city.name}`);
+  } finally {
+    setState({ favouriteBusy: false });
   }
 }
 
@@ -131,6 +161,7 @@ function boot() {
       onQuery: (query) => setState({ query }),
       onRetryWeather: () => refreshWeather(ui),
       onRetryForecast: (key) => loadForecast(key, ui, true),
+      onToggleFavourite: (key) => toggleFavourite(key, ui),
     },
   });
 
@@ -146,7 +177,9 @@ function boot() {
 
   subscribe((state, patch) => {
     ui.render(state);
-    if (scene && ('cities' in patch || 'unit' in patch)) scene.setCities(state.cities, state.unit);
+    if (scene && ('cities' in patch || 'unit' in patch || 'favourites' in patch)) {
+      scene.setCities(state.cities, state.unit, state.favourites);
+    }
   });
 
   try {

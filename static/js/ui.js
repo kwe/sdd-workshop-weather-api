@@ -12,6 +12,7 @@ import {
   temperatureColor,
 } from './weather.js';
 import { isDaylight } from './sun.js';
+import { favouriteItems, isFavourite } from './favourites.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -31,11 +32,16 @@ export function createUi({ getSun, actions }) {
     veil: $('veil'),
     legendBar: $('legend-bar'),
     legendLabels: $('legend-labels'),
+    favSection: $('favourites'),
+    favList: $('favourite-list'),
+    favToggle: $('fav-toggle'),
   };
   let focusReturn = null;
   let listSig = '';
   let detailSig = '';
   let searchTimer = null;
+  let favSig = '';
+  let starKey = null;
 
   nodes.search.addEventListener('input', () => {
     clearTimeout(searchTimer);
@@ -43,6 +49,9 @@ export function createUi({ getSun, actions }) {
       const cleaned = sanitize(nodes.search.value, 60);
       actions.onQuery(cleaned);
     }, 80);
+  });
+  nodes.favToggle.addEventListener('click', () => {
+    if (starKey) actions.onToggleFavourite(starKey);
   });
   $('detail-close').addEventListener('click', () => actions.onClose());
   $('reset-view').addEventListener('click', () => actions.onReset());
@@ -148,6 +157,60 @@ export function createUi({ getSun, actions }) {
       nodes.list.append(el('li', null, button));
     }
     if (focusedKey) nodes.list.querySelector(`[data-key="${CSS.escape(focusedKey)}"]`)?.focus();
+  }
+
+  function renderFavourites(state) {
+    const items = favouriteItems(state.favourites, state.cities);
+    const sig = JSON.stringify([
+      state.unit,
+      state.selectedKey,
+      items.map(({ favourite, city }) => [favourite.city, city?.key, city?.record?.temperatureCelsius]),
+    ]);
+    if (sig === favSig) return;
+    favSig = sig;
+    nodes.favSection.hidden = !items.length;
+    const focusedKey = document.activeElement?.dataset?.favKey;
+    clear(nodes.favList);
+    for (const { favourite, city } of items) {
+      const name = sanitize(favourite.city);
+      const temp = city ? formatTemp(city.record?.temperatureCelsius, state.unit) : '';
+      const button = el(
+        'button',
+        {
+          type: 'button',
+          class: 'fav-item',
+          'data-fav-key': city?.key ?? name,
+          'aria-current': city && city.key === state.selectedKey ? 'true' : null,
+          disabled: city ? null : true,
+          title: city ? null : 'No weather data loaded for this city',
+          on: {
+            click: (e) => {
+              focusReturn = e.currentTarget;
+              if (city) actions.onSelect(city.key);
+            },
+          },
+        },
+        el('span', { class: 'fav-star', 'aria-hidden': 'true' }, '★'),
+        el('span', { class: 'city-name' }, name),
+        el('span', { class: 'city-temp' }, temp),
+      );
+      if (city) button.querySelector('.city-temp').style.setProperty('color', temperatureColor(city.record?.temperatureCelsius));
+      nodes.favList.append(el('li', null, button));
+    }
+    if (focusedKey) nodes.favList.querySelector(`[data-fav-key="${CSS.escape(focusedKey)}"]`)?.focus();
+  }
+
+  function renderStar(state) {
+    const city = state.cities.find((c) => c.key === state.selectedKey);
+    starKey = city ? city.key : null;
+    nodes.favToggle.hidden = !city;
+    if (!city) return;
+    const on = isFavourite(state.favourites, city);
+    const name = sanitize(city.name);
+    nodes.favToggle.setAttribute('aria-pressed', String(on));
+    nodes.favToggle.setAttribute('aria-label', on ? `Remove ${name} from favourites` : `Add ${name} to favourites`);
+    nodes.favToggle.disabled = !!state.favouriteBusy;
+    nodes.favToggle.firstElementChild.textContent = on ? '★' : '☆';
   }
 
   function renderStatus(state) {
@@ -282,6 +345,8 @@ export function createUi({ getSun, actions }) {
       renderStatus(state);
       renderList(state);
       renderDetail(state);
+      renderFavourites(state);
+      renderStar(state);
     },
     showFallbackNote(message) {
       nodes.banner.hidden = false;

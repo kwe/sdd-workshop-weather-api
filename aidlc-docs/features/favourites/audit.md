@@ -54,3 +54,32 @@ No BLOCKING overlap (routes/table/migration unique). Wrote construction/plans/fa
 **Context**: Code Generation Part 1 (planning); approval requested.
 
 ---
+
+## Code Generation Plan - Approval (with orchestrator updates)
+**Timestamp**: 2026-10-30T13:04:40Z
+**User Input**: "Orchestrator: the claims-check script had a bug (js-module vs file claims of the same path were not compared). Fixed on main as commit 188dbaf. Run: git cherry-pick 188dbaf, then re-run scripts/aidlc-claims-check.sh - it now reports 10 shared files incl. api.js, state.js, main.js, ui.js, globe-scene.js. Update the Coordination section of your code generation plan to cover those JS files too (small additive hooks only). Coordination decision: weather-alerts owns the globe ring layer (ringsData); do NOT use it - your 'gold ring pin' must be pure CSS on the HTML pin element, which is fine. With those updates the plan is approved: log this, then generate the code."
+**AI Response**: Cherry-picked 188dbaf (now c85c614 on feature branch; scripts/aidlc-claims-check.sh only). Re-ran claims check:
+```
+SHARED-FILE [weather-alerts] file: README.md
+SHARED-FILE [weather-alerts] file: src/frontend.rs
+SHARED-FILE [weather-alerts] file: src/lib.rs
+SHARED-FILE [weather-alerts] file: static/css/app.css
+SHARED-FILE [weather-alerts] file: static/index.html
+SHARED-FILE [weather-alerts] file: static/js/api.js
+SHARED-FILE [weather-alerts] file: static/js/globe-scene.js
+SHARED-FILE [weather-alerts] file: static/js/main.js
+SHARED-FILE [weather-alerts] file: static/js/state.js
+SHARED-FILE [weather-alerts] file: static/js/ui.js
+RESULT: shared files only (allowed; keep edits minimal and additive)
+```
+No BLOCKING. Coordination section updated (10 shared files; no ringsData use; gold ring is pure CSS).
+**Context**: Code Generation plan approved; starting Part 2 (generation).
+
+---
+
+## Code Generation - Part 2 complete
+**Timestamp**: 2026-10-30T13:15:00Z
+**AI Response**: Generated all 16 plan steps (see construction/favourites/code/code-summary.md). Shared-file edits kept additive; ringsData not used. Local checks: cargo fmt --check OK; clippy -D warnings OK; cargo test all pass (favourites: 8 tests; frontend: +1). Approval requested before Build and Test (rebase on main + curl gate).
+**Context**: Code Generation gate.
+
+---

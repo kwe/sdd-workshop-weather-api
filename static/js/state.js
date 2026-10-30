@@ -7,6 +7,7 @@ const state = {
   forecasts: new Map(),
   status: { phase: 'loading', stale: false, lastOk: null, message: '' },
   query: '',
+  favourites: [],
 };
 
 try {
