@@ -1,7 +1,7 @@
 # AI-DLC State: weather-alerts
 
-- **Current Stage**: CONSTRUCTION - Build and Test complete (awaiting approval)
-- **Status**: awaiting-approval
+- **Current Stage**: Complete (merged by orchestrator)
+- **Status**: complete
 
 ## Project Information
 - **Project Type**: Brownfield (Rust/axum/SQLx/SQLite API + vanilla-JS globe frontend)
