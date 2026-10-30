@@ -1,0 +1,11 @@
+weather.db
+weather.db-shm
+weather.db-wal
+
+### Rust ###
+/target/
+
+### Editors ###
+.idea/
+.vscode/
+.DS_Store
