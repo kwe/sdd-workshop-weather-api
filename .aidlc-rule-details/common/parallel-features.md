@@ -51,7 +51,8 @@ docs, record it in `aidlc-docs/features/<feature-id>/inception/reverse-engineeri
 ## 3. Claims and Overlap Check (new mandatory step)
 
 Immediately after Workflow Planning is approved, and again before Code Generation starts, the
-agent MUST:
+agent MUST (the second run is mandatory even if the first found nothing, because other features
+publish their claims at different times):
 
 1. Write `aidlc-docs/features/<feature-id>/claims.md` using exactly this line format:
 
@@ -60,13 +61,19 @@ agent MUST:
    - route: <METHOD> <path>
    - table: <sql table name>
    - migration: <migration file name>
-   - js-module: <static/js/... path> (create|edit)
+   - resource: <shared runtime/UI resource> (own|use)
    ```
+
+   Use only these five kinds; any repo file (Rust, JS, CSS, HTML, docs) is a `file:` claim.
+   `resource:` covers shared things that are not files, so file-level checks can't see them,
+   e.g. `globe ring layer`, `globe html pin element`, `60s refresh timer`,
+   `localStorage key weather.unit`, `port 8080` (no parentheses inside the name). Use the exact resource names already listed in
+   other features' claims when they mean the same thing.
 
 2. Run `scripts/aidlc-claims-check.sh` from the workspace root and paste its output into the audit
    log entry.
 3. Act on the result:
-   - **BLOCKING** (same `route`, `table` or `migration` claimed by another active feature): stop and
+   - **BLOCKING** (same `route`, `table`, `migration` or `resource` claimed by another active feature): stop and
      ask the user how to resolve it, in a questions file, before generating code.
    - **SHARED-FILE** warnings: allowed, but the design MUST keep edits to those files minimal and
      additive (append a route, append a module, add a section), avoid reformatting or reordering
@@ -101,6 +108,8 @@ agent MUST:
 - Never read or write sibling worktrees directly. `scripts/aidlc-claims-check.sh` is the only
   sanctioned way to see other features' claims.
 - Temporary files go under `/tmp/<feature-id>/`.
+- Prefer `git -C <workspace-root>` and absolute paths over `cd sub/dir && ... && cd ../../..`;
+  relative hops trigger path-access prompts and are easy to get wrong.
 
 ## 7. Git Discipline
 
@@ -129,14 +138,30 @@ Before presenting Build and Test completion, the agent MUST:
    - `cargo clippy --all-targets --all-features -- -D warnings`
    - `cargo test` (full suite, not just the feature's tests)
 4. Start the server on the marker port, exercise the new endpoints with `curl`, record the
-   responses, then stop the server.
-5. Set the feature state `Status` to `awaiting-approval`.
+   responses.
+5. If any file under `static/` changed, run the real-browser check against that server and paste
+   its `RESULT` line and any `EXC`/`FAIL` lines:
+   `node scripts/browser-check.mjs http://localhost:<port>/ /tmp/<feature-id>/screenshot.png`
+   It fails on JS exceptions, non-2xx local responses, or literal `null`/`undefined`/`NaN` text.
+   Static source scans are not a substitute: both pilot defects passed every static test.
+   Never use Chrome's `--virtual-time-budget`; it fast-forwards fetch timeouts and fakes failures.
+6. Stop the server and set the feature state `Status` to `awaiting-approval`.
 
 The orchestrator merges approved feature branches into `main` one at a time. After a merge, any
 other in-flight feature must repeat step 9 against the new `main` before its own approval.
 
-## 10. Orchestrator Duties (not the feature agent)
+## 10. Post-Merge Defects
+
+A defect found after a feature is merged is fixed by that feature's agent on its own branch:
+rebase onto `main`, fix, add a regression test that fails without the fix, log a post-merge defect
+entry (root cause and why the gate missed it) in the feature audit, re-run section 9, and set
+`Status` back to `awaiting-approval`. The orchestrator re-merges, and every in-flight feature
+rebases again.
+
+## 11. Orchestrator Duties (not the feature agent)
 
 - Create worktrees and the `.aidlc-feature` marker.
-- Answer gates, merge to `main` sequentially, re-run the full test suite on `main`.
+- Answer gates, merge to `main` sequentially, re-run the full test suite and
+  `scripts/browser-check.mjs` on `main`.
+- Only merge a feature whose state `Status` is `complete`; the generated index shows any drift.
 - Regenerate `aidlc-docs/features/INDEX.md` with `scripts/aidlc-index.sh` on `main` after each merge.

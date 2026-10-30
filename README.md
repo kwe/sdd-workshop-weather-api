@@ -194,4 +194,5 @@ Users can star cities so they can get back to them quickly. Favourites are one g
 Several AI-DLC agents can build features at the same time, one per git worktree. The orchestrator creates each worktree with a git-ignored `.aidlc-feature` marker (feature id, branch, port, base). The agent then follows `.aidlc-rule-details/common/parallel-features.md`, keeping its state, audit log and claims under `aidlc-docs/features/<feature-id>/`.
 
 - `scripts/aidlc-claims-check.sh` compares this feature's claimed files, routes, tables and migrations with every other active worktree.
+- `scripts/browser-check.mjs` loads the globe in headless Chrome and fails on JS exceptions, failed requests or literal `null`/`undefined` text (`node scripts/browser-check.mjs http://localhost:8080/`).
 - `scripts/aidlc-index.sh` regenerates `aidlc-docs/features/INDEX.md` on `main` after a merge.

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Compare this feature's claims with every other active worktree's claims.
+# Kinds: file, route, table, migration, resource (js-module is accepted as an alias of file).
 # Exit 0: no blocking overlaps. Exit 1: blocking overlap. Exit 2: usage error.
 set -euo pipefail
 
@@ -12,7 +13,7 @@ mine="$root/aidlc-docs/features/$me/claims.md"
 
 # "- file: src/lib.rs (edit)" -> "file: src/lib.rs"; js-module is a file claim too.
 norm() {
-  sed -E -n 's/^- (file|route|table|migration|js-module): *([^(]*[^ (]).*/\1: \2/p' "$1" |
+  sed -E -n 's/^- (file|route|table|migration|js-module|resource): *([^(]*[^ (]).*/\1: \2/p' "$1" |
     sed 's/^js-module:/file:/' | sort -u
 }
 
@@ -29,7 +30,7 @@ while IFS= read -r wt; do
     while IFS= read -r line; do
       [ -z "$line" ] && continue
       case "${line%%:*}" in
-        route|table|migration) echo "BLOCKING    [$oid] $line"; blocking=1 ;;
+        route|table|migration|resource) echo "BLOCKING    [$oid] $line"; blocking=1 ;;
         *) echo "SHARED-FILE [$oid] $line"; shared=1 ;;
       esac
     done < <(comm -12 <(norm "$mine") <(norm "$other"))

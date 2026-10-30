@@ -244,3 +244,19 @@
 **Context**: Cycle 2 (Globe Frontend) closed.
 
 ---
+
+## Cycle 3 - Parallel Feature Mode Pilot (orchestrator retrospective)
+**Timestamp**: 2026-10-30T13:35:00Z
+**User Input**: "can you do that, create two new features. Assign them to copilots in their own panes and modify any ai dlc rules etc to make it work?"
+**AI Response**: Added Parallel Feature Mode (`.aidlc-rule-details/common/parallel-features.md`, `.aidlc-feature` marker, per-feature records under `aidlc-docs/features/<id>/`, `scripts/aidlc-claims-check.sh`, `scripts/aidlc-index.sh`, `PORT` env var). Ran `favourites` and `weather-alerts` concurrently in git worktrees with one Copilot agent each; merged sequentially (favourites first; alerts rebased three times, 5 conflicted files resolved by the agent keeping both features). Final main: 67 tests pass, real-browser check passes.
+**Findings fed back into the rules**:
+- Relative `../..` paths escaped worktrees (denied/steered) -> prefer absolute paths and `git -C`.
+- Claims check missed 5 shared files because agents used different kinds (`js-module` vs `file`) for the same path -> normalised; fixed vocabulary.
+- First claims check ran before the other feature published claims -> second check is mandatory.
+- Both features planned to use the globe's single ring layer, invisible to file claims -> new `resource:` claim kind (blocking).
+- Post-merge defect: literal "null" pin labels (DOM `append(null)`) passed all static tests -> `scripts/browser-check.mjs` real-browser gate; post-merge defect procedure.
+- Headless Chrome `--virtual-time-budget` fast-forwarded fetch timeouts and produced a false "Could not load weather data" -> banned in the gate.
+- Merged a fix while its state said awaiting-approval; the generated index exposed the drift -> only merge features with Status complete.
+**Context**: Cycle 3 complete. Per-feature records: `aidlc-docs/features/INDEX.md`.
+
+---
