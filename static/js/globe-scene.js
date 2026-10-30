@@ -262,10 +262,10 @@ export function createGlobeScene({ container, onSelect, onFail }) {
     clear(node);
     node.append(
       icon(kind),
-      favourite ? el('span', { class: 'pin-star', 'aria-hidden': 'true' }, '★') : null,
       el('span', { class: 'pin-temp' }, formatTemp(celsius, unit)),
       el('span', { class: 'pin-name' }, sanitize(city.name)),
     );
+    if (favourite) node.append(el('span', { class: 'pin-star', 'aria-hidden': 'true' }, '★'));
     node.style.setProperty('--pc', temperatureColor(celsius));
     node.setAttribute(
       'aria-label',

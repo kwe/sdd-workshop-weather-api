@@ -2,7 +2,7 @@
 
 - **Feature**: favourites (branch `feature/favourites`, port 8081, base `main`)
 - **Current Stage**: Complete (merged by orchestrator)
-- **Status**: complete
+- **Status**: awaiting-approval
 - **Project Type**: Brownfield (code is source of truth; shared docs are read-only)
 - **Workspace Root**: /Users/evanke02/Github/course/weather-api-worktrees/favourites
 
