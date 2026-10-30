@@ -199,3 +199,81 @@ async fn favourites_module_is_served_with_csp_and_wired_into_the_page() {
     }
     assert!(asset("js/ui.js").contains("fav-item"));
 }
+
+/// DOM `append()` stringifies `null`/`undefined`/`false`, so a conditional argument such as
+/// `cond ? el(..) : null` renders the literal text "null". Returns the offending arguments.
+fn append_args_with_nullish_branches(source: &str) -> Vec<String> {
+    let mut bad = Vec::new();
+    let mut from = 0;
+    while let Some(found) = source[from..].find(".append(") {
+        let start = from + found + ".append(".len();
+        let (mut depth, mut quote) = (0usize, None::<char>);
+        let (mut arg, mut end) = (String::new(), start);
+        for (offset, c) in source[start..].char_indices() {
+            end = start + offset;
+            if let Some(q) = quote {
+                if c == q {
+                    quote = None;
+                }
+                arg.push(' ');
+                continue;
+            }
+            match c {
+                '\'' | '"' | '`' => quote = Some(c),
+                '(' | '[' | '{' => depth += 1,
+                ')' | ']' | '}' if depth == 0 => break,
+                ')' | ']' | '}' => depth -= 1,
+                ',' if depth == 0 => {
+                    bad.extend(nullish_branch(&arg));
+                    arg.clear();
+                    continue;
+                }
+                _ => {}
+            }
+            if depth == 0 || !matches!(c, '(' | '[' | '{') {
+                if depth == 0 {
+                    arg.push(c);
+                } else {
+                    arg.push(' ');
+                }
+            }
+        }
+        bad.extend(nullish_branch(&arg));
+        from = end + 1;
+    }
+    bad
+}
+
+fn nullish_branch(arg: &str) -> Option<String> {
+    let arg = arg.trim();
+    let nullish = [": null", ": undefined", ": false", "&& ", "|| null"];
+    (arg.contains('?') && nullish.iter().any(|n| arg.contains(n))
+        || arg.contains("&&")
+        || arg.contains("|| null"))
+    .then(|| arg.to_owned())
+}
+
+#[test]
+fn append_scanner_detects_nullish_arguments() {
+    assert!(
+        !append_args_with_nullish_branches("node.append(a, fav ? el('b') : null, c)").is_empty()
+    );
+    assert!(!append_args_with_nullish_branches("node.append(fav && el('b'))").is_empty());
+    assert!(
+        append_args_with_nullish_branches("node.append(el('li', null, x ? null : y), c)")
+            .is_empty()
+    );
+    assert!(append_args_with_nullish_branches("if (f) node.append(el('b'))").is_empty());
+}
+
+#[test]
+fn append_calls_never_receive_nullish_conditional_arguments() {
+    for asset in frontend::ASSETS.iter().filter(|a| a.path.ends_with(".js")) {
+        let bad = append_args_with_nullish_branches(asset.body);
+        assert!(
+            bad.is_empty(),
+            "{} passes a possibly-null argument to append(): {bad:?}",
+            asset.path
+        );
+    }
+}

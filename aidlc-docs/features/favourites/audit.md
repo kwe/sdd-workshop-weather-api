@@ -105,3 +105,15 @@ No BLOCKING. Coordination section updated (10 shared files; no ringsData use; go
 **Context**: Workflow complete (Operations is a placeholder).
 
 ---
+
+## Post-merge defect: literal "null" on non-favourite pins
+**Timestamp**: 2026-10-30T14:00:00Z
+**User Input**: "Orchestrator bug report (found in a real-browser check after merge): every NON-favourite pin on the globe shows the literal text 'null'. Cause: static/js/globe-scene.js updatePin passes `favourite ? el(...) : null` into node.append(); DOM append() stringifies null into a 'null' text node. Please: (1) git rebase main (your branch is already merged; main has moved), (2) fix it so nothing is appended for non-favourites, (3) add a regression test in tests/frontend.rs that would have failed before the fix (e.g. assert no '? ... : null' argument inside an append( call in static/js, or a narrower check you justify), (4) log it in your feature audit as a post-merge defect with root cause and why your tests missed it, (5) run fmt/clippy/full cargo test, commit on feature/favourites as [favourites] Fix ..., set Status awaiting-approval, and stop."
+**Root cause**: `updatePin` passed `favourite ? el(...) : null` to native `Node.append()`, which stringifies null into a "null" text node. The project's `el()` helper skips null children, and I wrongly assumed the same for `append()`.
+**Fix**: The star badge is now appended in a separate `if (favourite) node.append(...)`; nothing is appended for non-favourites (CSS `order` keeps the layout).
+**Regression test**: `append_calls_never_receive_nullish_conditional_arguments` in tests/frontend.rs scans every embedded .js asset for `.append(` arguments at top level containing `? ... : null/undefined/false`, `&&` or `|| null`. Nested `el()` children are ignored since `el()` handles them. `append_scanner_detects_nullish_arguments` checks the scanner on good and bad samples. Verified the test fails on the pre-fix file and passes on the fix.
+**Why tests missed it**: There is no JS runtime or DOM in the test setup (Rust-only, by decision), so frontend tests only check served assets, forbidden tokens and string presence. The star test asserted that code existed, not rendered output. Code review reasoned from `el()` semantics and nobody rendered the page in a browser. Residual risk: behaviour-level UI bugs remain untestable without a DOM; a manual browser check should be part of the gate.
+**Verification**: fmt OK, clippy -D warnings OK, cargo test all pass (4 + 17 + 8 + 9).
+**Context**: Post-merge defect fix; status awaiting-approval.
+
+---
