@@ -10,9 +10,10 @@ me=$(awk -F': *' '$1=="feature"{print $2}' "$marker" | awk '{print $1}')
 mine="$root/aidlc-docs/features/$me/claims.md"
 [ -f "$mine" ] || { echo "ERROR: missing $mine" >&2; exit 2; }
 
-# "- file: src/lib.rs (edit)" -> "file: src/lib.rs"
+# "- file: src/lib.rs (edit)" -> "file: src/lib.rs"; js-module is a file claim too.
 norm() {
-  sed -E -n 's/^- (file|route|table|migration|js-module): *([^(]*[^ (]).*/\1: \2/p' "$1" | sort -u
+  sed -E -n 's/^- (file|route|table|migration|js-module): *([^(]*[^ (]).*/\1: \2/p' "$1" |
+    sed 's/^js-module:/file:/' | sort -u
 }
 
 blocking=0
