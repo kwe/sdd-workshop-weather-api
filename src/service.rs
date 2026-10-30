@@ -1,10 +1,49 @@
 use crate::{
     error::ApiError,
-    models::{CreateWeatherRecordRequest, WeatherRecord},
+    models::{CreateWeatherRecordRequest, ForecastDay, ForecastRow, WeatherRecord},
     repository,
 };
-use chrono::Utc;
+use chrono::{Days, NaiveDate, Utc};
 use sqlx::SqlitePool;
+
+pub async fn get_forecast(
+    pool: &SqlitePool,
+    city: &str,
+    today: NaiveDate,
+) -> Result<Vec<ForecastDay>, ApiError> {
+    let (display, key) = normalize_city(city)?;
+    let rows = repository::list_forecast_rows(pool, &key).await?;
+    if rows.is_empty() {
+        return Err(ApiError::not_found(format!(
+            "No forecast found for city {display}"
+        )));
+    }
+    Ok(rows
+        .into_iter()
+        .map(|row| to_forecast_day(row, today))
+        .collect())
+}
+
+fn normalize_city(city: &str) -> Result<(String, String), ApiError> {
+    let display = city.trim();
+    if display.is_empty() {
+        return Err(ApiError::bad_request("City is required"));
+    }
+    Ok((display.to_owned(), display.to_lowercase()))
+}
+
+fn to_forecast_day(row: ForecastRow, today: NaiveDate) -> ForecastDay {
+    let date = today
+        .checked_add_days(Days::new(row.day_offset.max(0) as u64))
+        .unwrap_or(today);
+    ForecastDay {
+        date: date.format("%Y-%m-%d").to_string(),
+        high_temperature_celsius: row.high_temperature_celsius,
+        low_temperature_celsius: row.low_temperature_celsius,
+        conditions: row.conditions,
+        precipitation_chance: row.precipitation_chance,
+    }
+}
 
 pub async fn list_weather_records(
     pool: &SqlitePool,
@@ -70,5 +109,49 @@ pub async fn delete_weather_record(pool: &SqlitePool, id: i64) -> Result<(), Api
         Err(ApiError::not_found(format!(
             "Weather record not found for id {id}"
         )))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn row(day_offset: i32) -> ForecastRow {
+        ForecastRow {
+            day_offset,
+            high_temperature_celsius: 20.5,
+            low_temperature_celsius: 10.0,
+            conditions: "Sunny".to_owned(),
+            precipitation_chance: 15,
+        }
+    }
+
+    #[test]
+    fn maps_day_offsets_to_dates_across_a_month_boundary() {
+        let today = NaiveDate::from_ymd_opt(2026, 10, 30).unwrap();
+        assert_eq!(to_forecast_day(row(0), today).date, "2026-10-30");
+        assert_eq!(to_forecast_day(row(4), today).date, "2026-11-03");
+    }
+
+    #[test]
+    fn copies_forecast_values() {
+        let today = NaiveDate::from_ymd_opt(2026, 1, 1).unwrap();
+        let day = to_forecast_day(row(1), today);
+        assert_eq!(day.high_temperature_celsius, 20.5);
+        assert_eq!(day.low_temperature_celsius, 10.0);
+        assert_eq!(day.conditions, "Sunny");
+        assert_eq!(day.precipitation_chance, 15);
+    }
+
+    #[test]
+    fn normalizes_city_with_trim_and_unicode_lowercase() {
+        let (display, key) = normalize_city("  São Paulo ").unwrap();
+        assert_eq!(display, "São Paulo");
+        assert_eq!(key, "são paulo");
+    }
+
+    #[test]
+    fn rejects_blank_city() {
+        assert!(normalize_city("   ").is_err());
     }
 }

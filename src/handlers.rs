@@ -1,6 +1,6 @@
 use crate::{
     error::{ApiError, bad_path_id, json_error, with_path},
-    models::{CreateWeatherRecordRequest, ErrorResponse, WeatherRecord},
+    models::{CreateWeatherRecordRequest, ErrorResponse, ForecastDay, WeatherRecord},
     service,
 };
 use axum::{
@@ -8,6 +8,7 @@ use axum::{
     extract::{Path, Query, State, rejection::JsonRejection},
     http::{StatusCode, Uri},
 };
+use chrono::Utc;
 use serde::Deserialize;
 use sqlx::SqlitePool;
 use utoipa::IntoParams;
@@ -53,6 +54,28 @@ pub async fn get_weather_record(
 ) -> Result<Json<WeatherRecord>, ApiError> {
     let id = id.parse::<i64>().ok().ok_or_else(|| bad_path_id(&uri))?;
     service::get_weather_record(&pool, id)
+        .await
+        .map(Json)
+        .map_err(|error| with_path(error, &uri))
+}
+
+/// Returns a 5-day forecast (today through today + 4, UTC dates). Data is seeded and static.
+#[utoipa::path(
+    get,
+    path = "/api/weather/forecast/{city}",
+    params(("city" = String, Path, description = "City name (case-insensitive)")),
+    responses(
+        (status = 200, description = "Five daily forecasts ordered by date", body = [ForecastDay]),
+        (status = 400, description = "City is blank", body = ErrorResponse),
+        (status = 404, description = "No forecast found for city", body = ErrorResponse)
+    )
+)]
+pub async fn get_forecast(
+    State(pool): State<SqlitePool>,
+    Path(city): Path<String>,
+    uri: Uri,
+) -> Result<Json<Vec<ForecastDay>>, ApiError> {
+    service::get_forecast(&pool, &city, Utc::now().date_naive())
         .await
         .map(Json)
         .map_err(|error| with_path(error, &uri))

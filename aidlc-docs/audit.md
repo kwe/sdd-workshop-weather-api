@@ -1,0 +1,144 @@
+# AI-DLC Audit Log
+
+## Workspace Detection - Initial Request
+**Timestamp**: 2026-10-30T11:10:27Z
+**User Input**: "I want to add a 5-day weather forecast feature to this service. All the business and technical context is in the docs/requirements/ folder — list the files in docs/requirements/ and read every document in there, and the existing codebase, then begin the AI-DLC workflow."
+**AI Response**: Displayed welcome message; listed and read all 5 docs in docs/requirements/ (01-stakeholder-request-email, 02-partner-feedback-summary, 03-technical-constraints, 04-product-brief, 05-api-usage-analytics) and all source/test/migration files. Loaded common rules and extension opt-in prompts (security, resiliency, property-based testing). No aidlc-state.md existed.
+**Context**: Workspace Detection - brownfield Rust/Axum/SQLx service detected; no prior reverse-engineering artifacts; proceeding to Reverse Engineering.
+
+---
+
+## Reverse Engineering
+**Timestamp**: 2026-10-30T11:11:12Z
+**User Input**: "(none - automatic progression from Workspace Detection)"
+**AI Response**: Generated reverse-engineering artifacts in aidlc-docs/inception/reverse-engineering/. Presented completion message requesting approval.
+**Context**: Reverse Engineering complete; awaiting explicit user approval.
+
+---
+
+## Reverse Engineering - Approval
+**Timestamp**: 2026-10-30T11:12:06Z
+**User Input**: "Approve & Continue. The reverse engineering analysis is accurate."
+**AI Response**: Proceeded to Requirements Analysis (Standard depth). Created requirements/requirement-verification-questions.md (12 clarifying + 3 extension opt-in questions).
+**Context**: Requirements Analysis - awaiting user answers (gate).
+
+---
+
+## Requirements Analysis - Answers Received
+**Timestamp**: 2026-10-30T11:12:49Z
+**User Input**: "I've filled in the answers, please proceed."
+**AI Response**: Read answers (Q1 B, Q2-Q12 A; Security B, Resiliency B, PBT C). No contradictions found. Extensions all opted out (full rule files not loaded; skip logged). Generated requirements/requirements.md. Presenting for approval.
+**Context**: Requirements Analysis complete; approval prompt issued.
+
+---
+
+## Requirements Analysis - Approval
+**Timestamp**: 2026-10-30T11:13:22Z
+**User Input**: "Requirements approved. Add User Stories — this is a customer-facing API change with multiple personas (internal Dashboard/Mobile teams, external partners), so per the AI-DLC rules we want the User Stories stage. Then continue."
+**AI Response**: Requirements approved. Including User Stories stage. Created plans/user-stories-assessment.md and plans/story-generation-plan.md (Part 1 - Planning) with questions.
+**Context**: User Stories Part 1 - awaiting answers to plan questions (gate).
+
+---
+
+## User Stories - Plan Answers and Approval
+**Timestamp**: 2026-10-30T11:13:58Z
+**User Input**: "I've filled in the answers in story-generation-plan.md, please proceed. The plan is approved if there are no ambiguities — go ahead and generate the personas and stories."
+**AI Response**: Answers read (Q1 C hybrid, Q2 A three personas, Q3 A coarse, Q4 A Given/When/Then, Q5 A maintainer NFR story, Q6 A FR/NFR IDs + MoSCoW, Q7 A JSON examples). No ambiguities or contradictions (Q3 coarse 4-5 reconciled as 5 stories incl. the maintainer story). Plan treated as approved per user's conditional approval. Generated user-stories/personas.md and stories.md; all plan checkboxes marked complete.
+**Context**: User Stories Part 2 complete; approval prompt issued.
+
+---
+
+## User Stories - Approval
+**Timestamp**: 2026-10-30T11:14:47Z
+**User Input**: "Approve & Continue."
+**AI Response**: User stories approved. Executed Workflow Planning; created plans/execution-plan.md (execute: Functional Design, Code Generation, Build and Test; skip: Application Design, Units Generation, NFR Requirements, NFR Design, Infrastructure Design). Extensions disabled - security, resiliency and PBT enforcement skipped.
+**Context**: Workflow Planning - approval prompt: "Ready to proceed with this plan?"
+
+---
+
+## Workflow Planning - Approval (with change)
+**Timestamp**: 2026-10-30T11:15:28Z
+**AI Prompt**: "Ready to proceed with this plan?"
+**User Input**: "Add Skipped Stages: include Application Design at minimal depth — the feature adds new methods in models/repository/service/handlers, which per the AI-DLC rules warrants it. Keep Units Generation, NFR Requirements, NFR Design and Infrastructure Design skipped. Otherwise the plan is approved; update the execution plan and proceed to Application Design."
+**Status**: Approved with changes (Application Design added at minimal depth)
+**AI Response**: Updated execution-plan.md and aidlc-state.md. Created plans/application-design-plan.md (minimal depth, 5 questions) per application-design.md step 2-6.
+**Context**: Application Design Part 1 - awaiting answers (gate).
+
+---
+
+## Application Design - Answers and Generation
+**Timestamp**: 2026-10-30T11:16:06Z
+**User Input**: "I've filled in the answers in application-design-plan.md, please proceed and generate the application design artifacts."
+**AI Response**: Read answers (Q1 A, Q2 A, Q3 A, Q4 B with details: city_key column hand-lowercased in seed, index, equality query, service normalises via trim + to_lowercase, Q5 A). No ambiguities. Generated application-design/components.md, component-methods.md, services.md, component-dependency.md, application-design.md; plan checkboxes marked complete. Approval prompt issued.
+**Context**: Application Design complete (minimal depth); awaiting approval.
+
+---
+
+## Application Design - Approval
+**Timestamp**: 2026-10-30T11:16:54Z
+**User Input**: "Approve & Continue."
+**AI Response**: Application Design approved; Units Generation remains skipped (unit treated as `forecast-api`; no unit-of-work files). Started Functional Design; created construction/plans/forecast-api-functional-design-plan.md with questions.
+**Context**: Functional Design (unit forecast-api) - awaiting answers (gate).
+
+---
+
+## Functional Design - Answers and Generation
+**Timestamp**: 2026-10-30T11:17:34Z
+**User Input**: "I've filled in the answers in the functional design plan, please proceed and generate the functional design artifacts."
+**AI Response**: Read answers (Q1 A, Q2 A, Q3 B "no source document asks for this; keep values sensible in the seed but enforce only the CHECK constraints", Q4 A, Q5 A, Q6 A, Q7 A). No ambiguities. Generated construction/forecast-api/functional-design/{domain-entities,business-rules,business-logic-model}.md including full seed table. Approval prompt issued.
+**Context**: Functional Design complete; awaiting approval (2-option message).
+
+---
+
+## Functional Design - Approval
+**Timestamp**: 2026-10-30T11:18:23Z
+**User Input**: "Continue to Next Stage."
+**AI Response**: Functional Design approved. Started Code Generation Part 1 (Planning): created construction/plans/forecast-api-code-generation-plan.md (13 steps).
+**Context**: Code Generation plan approval prompt: "Approve the code generation plan so generation can begin?"
+
+---
+
+## Code Generation - Plan Approval
+**Timestamp**: 2026-10-30T11:18:52Z
+**User Input**: "Approve"
+**AI Response**: Code generation plan approved. Beginning Part 2 (Generation), executing steps 1-13 in order.
+**Context**: Code Generation Part 2.
+
+---
+
+## Code Generation - Part 2 Complete
+**Timestamp**: 2026-10-30T11:40:00Z
+**User Input**: N/A
+**AI Response**: Executed steps 1-13; fmt, clippy and tests pass (4 unit, 16 integration). Presented completion message for approval.
+**Context**: Code Generation Part 2.
+
+---
+
+## Code Generation - Approval
+**Timestamp**: 2026-10-30T11:21:00Z
+**User Input**: "Continue to Next Stage."
+**AI Response**: Code Generation approved. Starting Build and Test.
+**Context**: Transition to Build and Test.
+
+---
+
+## Build and Test Stage
+**Timestamp**: 2026-10-30T11:30:00Z
+**Build Status**: Success
+**Test Status**: Pass (4 unit, 16 integration; live smoke test OK, 1.4 ms)
+**Files Generated**:
+- build-instructions.md
+- unit-test-instructions.md
+- integration-test-instructions.md
+- performance-test-instructions.md
+- build-and-test-summary.md
+
+---
+
+## Build and Test - Approval / Workflow Complete
+**Timestamp**: 2026-10-30T11:23:32Z
+**User Input**: "Approve & Continue. Operations is a placeholder, so mark the workflow complete in aidlc-state.md and audit.md; do not commit — I will commit."
+**AI Response**: Build and Test approved. Operations is a placeholder with no activities; AI-DLC workflow marked complete. No commit made (user will commit).
+**Context**: Operations placeholder; workflow complete.
+
+---

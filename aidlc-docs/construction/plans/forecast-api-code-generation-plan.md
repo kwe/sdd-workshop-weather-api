@@ -1,0 +1,56 @@
+# Code Generation Plan — unit `forecast-api`
+
+**This plan is the single source of truth for Code Generation.** Brownfield: modify existing files in place; only the migration is a new file. Application code is at the workspace root (`/Users/evanke02/Github/course/weather-api`), never in `aidlc-docs/`.
+
+## Unit Context
+- **Stories**: S1, S2, S3, S4, S5
+- **Design inputs**: application-design/application-design.md; functional-design/{domain-entities,business-rules,business-logic-model}.md
+- **Dependencies**: none on other units/services; no new crates
+- **Owned DB entity**: `forecasts` table
+- **Interfaces**: `GET /api/weather/forecast/{city}` -> `200 [ForecastDay]`, `400/404/500 ErrorResponse`
+- **Extensions**: security, resiliency, PBT all disabled (not enforced)
+
+## Steps
+
+### Database Migration Scripts
+- [x] **Step 1**: Create `migrations/0002_create_forecasts.sql` - table `forecasts` (columns per domain-entities.md), CHECKs (high >= low, chance 0-100, offset 0-4), UNIQUE (`city_key`,`day_offset`), index on `city_key`, seed 10 cities x 5 days from business-logic-model.md with hand-lowercased `city_key`. *(S1, S5; BR-9, BR-10, BR-11)*
+
+### Models
+- [x] **Step 2**: Modify `src/models.rs` - add `ForecastRow` (`FromRow`, internal) and `ForecastDay` (`Serialize`, `ToSchema`, camelCase). *(S1)*
+
+### Repository Layer
+- [x] **Step 3**: Modify `src/repository.rs` - add `list_forecast_rows(pool, city_key)` ordered by `day_offset`. *(S1, S2)*
+- [x] **Step 4**: Repository unit tests - covered by HTTP tests and the seed test in Step 10 (repository is exercised against the in-memory DB).
+
+### Business Logic
+- [x] **Step 5**: Modify `src/service.rs` - add `get_forecast(pool, city, today)`, private `normalize_city`, `to_forecast_day`. Rules BR-1..BR-6. *(S1, S2, S3)*
+- [x] **Step 6**: Add `#[cfg(test)]` unit tests in `src/service.rs`: `to_forecast_day` date mapping (offsets 0 and 4, month boundary), `normalize_city` (trim, case, Unicode `São Paulo` -> `são paulo`, blank -> 400). *(S1, S2, NFR-4)*
+
+### API Layer
+- [x] **Step 7**: Modify `src/handlers.rs` - add `get_forecast` with `#[utoipa::path]` (200/400/404/500, note that data is seeded/static and dates are UTC). *(S1-S3, FR-10)*
+- [x] **Step 8**: Modify `src/lib.rs` - register GET route `/api/weather/forecast/{city}`, add handler path and `ForecastDay` schema to `ApiDoc`. *(S1, S4, FR-10)*
+
+### Integration Tests
+- [x] **Step 9**: Modify `tests/api.rs` - add async HTTP tests (existing tests untouched): 200 London with 5 entries, ordered, rolling dates from today UTC, field shapes; case/whitespace/percent-encoded/Unicode matching (`LONDON`, `New%20York`, `s%C3%A3o%20paulo`, `%20London%20`); blank -> 400; unknown city and known-city-without-forecast (insert a `weather_records` city via POST) -> 404 with message and `path`; non-GET -> 405; `NYC` -> 404; OpenAPI contains the path. *(S1-S4)*
+- [x] **Step 10**: Add seed and constraint tests in `tests/api.rs`: all 10 cities return 5 entries; each `city_key` equals Rust `to_lowercase()` of `city` (via direct sqlx query on the pool); CHECK constraints reject high < low, chance 101, offset 5; unique constraint rejects duplicates; `0001` migration data unchanged (weather record count still 10). *(S5)*
+
+### Documentation
+- [x] **Step 11**: Modify `README.md` - add endpoint to table, forecast response example and errors, seed data note (static, dates rolling from UTC today), project structure (migration 0002), mention of the 5-day forecast challenge remains. *(S5, FR-10)*
+- [x] **Step 12**: Create `aidlc-docs/construction/forecast-api/code/code-summary.md` (markdown summary of changed/created files).
+
+### Deployment Artifacts
+- [x] **Step 13**: N/A - no deployment artifacts in this repo (note in summary).
+
+## Verification (executed in Build and Test, quick smoke after generation)
+`cargo fmt --check`, `cargo clippy --all-targets --all-features -- -D warnings`, `cargo test`.
+
+## Story Traceability
+| Story | Steps |
+|---|---|
+| S1 | 1, 2, 3, 5, 6, 7, 8, 9 |
+| S2 | 3, 5, 6, 9 |
+| S3 | 5, 7, 9 |
+| S4 | 8, 9 |
+| S5 | 1, 10, 11, 12 |
+
+Total steps: 13 (modifies 6 existing files, creates 2 new files).

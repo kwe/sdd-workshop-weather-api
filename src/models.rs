@@ -28,6 +28,27 @@ pub struct CreateWeatherRecordRequest {
     pub recorded_at: Option<NaiveDateTime>,
 }
 
+#[derive(Debug, Clone, FromRow)]
+pub struct ForecastRow {
+    pub day_offset: i32,
+    pub high_temperature_celsius: f64,
+    pub low_temperature_celsius: f64,
+    pub conditions: String,
+    pub precipitation_chance: i32,
+}
+
+#[derive(Debug, Clone, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ForecastDay {
+    /// Calendar date (UTC) in `YYYY-MM-DD` format
+    pub date: String,
+    pub high_temperature_celsius: f64,
+    pub low_temperature_celsius: f64,
+    pub conditions: String,
+    /// Chance of precipitation as a percentage (0-100)
+    pub precipitation_chance: i32,
+}
+
 #[derive(Debug, Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ErrorResponse {

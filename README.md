@@ -63,6 +63,17 @@ OpenAPI JSON: `http://localhost:8080/v3/api-docs`
 | GET | `/api/weather/{id}` | Get a single weather record by ID |
 | POST | `/api/weather` | Create a new weather record |
 | DELETE | `/api/weather/{id}` | Delete a weather record by ID |
+| GET | `/api/weather/forecast/{city}` | 5-day forecast (today through today + 4, UTC dates), city case-insensitive |
+
+The forecast data is seeded and static; only the dates roll forward. Unknown
+cities return 404 and a blank city returns 400.
+
+Example: `GET /api/weather/forecast/london`
+
+```json
+[{"date":"2026-10-30","highTemperatureCelsius":19.0,"lowTemperatureCelsius":11.0,"conditions":"Cloudy","precipitationChance":40}]
+```
+(truncated to the first of 5 days)
 
 ### Example POST Body
 
@@ -97,7 +108,7 @@ Validation and not-found responses use this shape:
 ## Seed Data
 
 The SQLite migration creates sample weather records for London, New York,
-Tokyo, Sydney, Paris, Berlin, Mumbai, São Paulo, Cape Town, and Toronto.
+Tokyo, Sydney, Paris, Berlin, Mumbai, São Paulo, Cape Town, and Toronto. Migration `0002` seeds a 5-day forecast template for the same cities.
 
 ## Testing
 

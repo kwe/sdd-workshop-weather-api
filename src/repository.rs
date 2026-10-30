@@ -1,5 +1,19 @@
-use crate::models::WeatherRecord;
+use crate::models::{ForecastRow, WeatherRecord};
 use sqlx::SqlitePool;
+
+pub async fn list_forecast_rows(
+    pool: &SqlitePool,
+    city_key: &str,
+) -> Result<Vec<ForecastRow>, sqlx::Error> {
+    sqlx::query_as::<_, ForecastRow>(
+        "SELECT day_offset, high_temperature_celsius, low_temperature_celsius, \
+         conditions, precipitation_chance FROM forecasts \
+         WHERE city_key = ? ORDER BY day_offset",
+    )
+    .bind(city_key)
+    .fetch_all(pool)
+    .await
+}
 
 pub async fn list_weather_records(
     pool: &SqlitePool,

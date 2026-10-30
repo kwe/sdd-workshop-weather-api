@@ -16,10 +16,12 @@ use utoipa_swagger_ui::SwaggerUi;
         handlers::get_weather_records,
         handlers::get_weather_record,
         handlers::create_weather_record,
-        handlers::delete_weather_record
+        handlers::delete_weather_record,
+        handlers::get_forecast
     ),
     components(schemas(
         models::WeatherRecord,
+        models::ForecastDay,
         models::CreateWeatherRecordRequest,
         models::ErrorResponse
     )),
@@ -33,6 +35,7 @@ pub fn app(pool: SqlitePool) -> Router {
             "/api/weather",
             get(handlers::get_weather_records).post(handlers::create_weather_record),
         )
+        .route("/api/weather/forecast/{city}", get(handlers::get_forecast))
         .route(
             "/api/weather/{id}",
             get(handlers::get_weather_record).delete(handlers::delete_weather_record),
